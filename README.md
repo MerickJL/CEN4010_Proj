@@ -30,6 +30,10 @@ Installing SQLAlchemy
 
     pip install sqlalchemy
 
+Install SQLlite
+
+    pip install pysqlite3
+
 # Launch server
 
     python3 BookstoreAPI.py
