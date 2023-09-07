@@ -22,7 +22,7 @@ ma = Marshmallow(app)
 
 # Component imports
 """
-We are going to keep classes in separate files. This way it will be easier to
+Keep classes in separate files. This way it will be easier to
 maintain and integrate new features. Please be sure to name classes uniquely.
 """
 import components.views  # noqa:402
