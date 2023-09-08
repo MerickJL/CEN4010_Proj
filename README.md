@@ -30,7 +30,7 @@ Installing SQLAlchemy
 
     pipenv install sqlalchemy
 
-Install SQLlite
+Install SQLlite (back up just in case SQLAlchemy doesn't work)
 
     pipenv install pysqlite3
 
