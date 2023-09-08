@@ -20,19 +20,19 @@ If you want to install all the packages system-wide:
 
 Installing Marshmallow API
 
-    pip install marshmallow
+    pipenv install marshmallow
 
 Intalling Flask
 
-    pip install flask
+    pipenv install flask
 
 Installing SQLAlchemy
 
-    pip install sqlalchemy
+    pipenv install sqlalchemy
 
 Install SQLlite
 
-    pip install pysqlite3
+    pipenv install pysqlite3
 
 # Launch server
 
