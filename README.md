@@ -6,29 +6,29 @@ This API will be used as part of the backend for a bookstore website.
 
 Make sure you have a Python version installed and added to your PATH
 
-### Install dependencies/requirements
+### Install dependencies/requirements. There are in order of how I did them to work. 
 
-If you want to have a specific environment run:
+ 1. If you want to have a specific environment run:
 
-    pip3 install pipenv # Only the first time
-    pipenv lock --pre --clear
-    pipenv shell
+            pip3 install pipenv # Only the first time
+            pipenv lock --pre --clear
+            pipenv shell
+
+  2.  Intalling Flask
+
+             pipenv install flask
+
+  3.  Installing Marshmallow API
+
+                pipenv install marshmallow
+
+  4.  Installing SQLAlchemy
+
+                pipenv install sqlalchemy
 
 If you want to install all the packages system-wide:
 
     pip3 install -r requirements.txt
-
-Installing Marshmallow API
-
-    pipenv install marshmallow
-
-Intalling Flask
-
-    pipenv install flask
-
-Installing SQLAlchemy
-
-    pipenv install sqlalchemy
 
 Install SQLlite (back up just in case SQLAlchemy doesn't work)
 
