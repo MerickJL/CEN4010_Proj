@@ -11,8 +11,6 @@ Make sure you have a Python version installed and added to your PATH
  1. If you want to have a specific environment run:
 
             pip3 install pipenv # Only the first time
-            pipenv lock --pre --clear
-            pipenv shell
 
   2.  Intalling Flask
 
@@ -25,6 +23,11 @@ Make sure you have a Python version installed and added to your PATH
   4.  Installing SQLAlchemy
 
                 pipenv install sqlalchemy
+      
+  6. Lock the Environment
+
+                 pipenv lock --pre --clear
+                 pipenv shell
 
 If you want to install all the packages system-wide:
 
