@@ -16,15 +16,17 @@ Make sure you have a Python version installed and added to your PATH
 
              pipenv install flask
 
-  3.  Installing Marshmallow API
+  4.  Installing Marshmallow API
 
                 pipenv install marshmallow
+                pipenv install flask_marshmallow
 
-  4.  Installing SQLAlchemy
+  6.  Installing SQLAlchemy
 
                 pipenv install sqlalchemy
+                pipenv install flask_sqlalchemy
       
-  6. Lock the Environment
+  8. Lock the Environment
 
                  pipenv lock --pre --clear
                  pipenv shell
