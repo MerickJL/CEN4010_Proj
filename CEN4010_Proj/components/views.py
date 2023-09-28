@@ -141,7 +141,7 @@ def getBooksByAuthor(AUTHOR):
     return jsonify(byAuthor)
 
 
-# ******************** [1] Book Details ********************
+# ******************** [1] Book Details END ********************
 
 # ******************** [2] Profile Management ********************
 @app.route("/profile/createUser", methods=["POST"])
@@ -264,7 +264,7 @@ def viewCards(userName):
     # Returns all the DB items as json
     return jsonify(result)
 
-# ******************** [2] Profile Management ********************
+# ******************** [2] Profile Management END ********************
 
 
 # ******************** [3] Book Browsing & Sorting *******************
@@ -317,7 +317,7 @@ def getBooksByLimit(LIMIT):
     return jsonify(result)
 
 
-# ******************** [3] Book Browsing & Sorting *******************
+# ******************** [3] Book Browsing & Sorting END *******************
 
 # ******************** [4] Wishlist ************************
 
@@ -326,7 +326,7 @@ def getBooksByLimit(LIMIT):
 
 
 
-# ******************** [4] Wishlist ************************
+# ******************** [4] Wishlist END ************************
 
 # *********************[5] Shopping Cart *******************
 @app.route("/admin/ShoppingCart", methods=["POST"])
@@ -408,10 +408,10 @@ def getListFromShoppingCart(id):
     return jsonify(result)
 
 
-# *********************[5] Shopping Cart *******************
+# *********************[5] Shopping Cart END *******************
 
 # *********************[6] Rating **************************
 
 
 
-# *********************[6] Rating **************************
+# *********************[6] Rating END **************************
