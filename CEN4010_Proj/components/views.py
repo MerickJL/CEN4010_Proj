@@ -4,11 +4,14 @@ from flask import Flask, request, jsonify
 from sqlalchemy import exists, func
 from components.BookDetails import Book
 from components.Author import Author
+from components.Wishlist import Wishlist
 from components.Profile import Profile
 from components.Profile import CreditCards
 from components.ShoppingCart import ShoppingCart
 from components.ShoppingCart import BookShopping
+from components.Rate import Rate
 from __main__ import db, app
+
 
 """
 This file will contain all the routes with their functions. Make sure to add a
@@ -17,7 +20,8 @@ It is easier to maintain and check for conflicts if all the routes are in a
 single file, make sure you are naming each function uniquely.
 """
 
-# ******************** [1] Book Details ********************
+
+# ******************** [4] Book Details ********************
 @app.route("/admin/books", methods=["POST"])
 def addBook():
     """Handles adding a book to the database"""
@@ -141,7 +145,7 @@ def getBooksByAuthor(AUTHOR):
     return jsonify(byAuthor)
 
 
-# ******************** [1] Book Details END ********************
+# ******************** [4] Book Details ********************
 
 # ******************** [2] Profile Management ********************
 @app.route("/profile/createUser", methods=["POST"])
@@ -199,6 +203,7 @@ def getUserByUsername(userName):
 
     return Profile.product_schema.jsonify(user)
 
+
 @app.route("/profile/<userName>", methods=["PUT"])
 def updateUser(userName):
     user = Profile.query.filter_by(UserName=userName).first()
@@ -220,6 +225,7 @@ def updateUser(userName):
 
     # Update user fields
     return user.product_schema.jsonify(user)
+
 
 @app.route("/profile/<userName>/creditcards", methods=["POST"])
 def addCards(userName):
@@ -264,10 +270,10 @@ def viewCards(userName):
     # Returns all the DB items as json
     return jsonify(result)
 
-# ******************** [2] Profile Management END ********************
+# ******************** [2] Profile Management ********************
 
 
-# ******************** [3] Book Browsing & Sorting *******************
+# ******************** [1] Book Browsing & Sorting *******************
 @app.route("/books/genre/<GENRE>", methods=["GET"])
 def getBooksByGenre(GENRE):
     """Handles getting books by genre from the database"""
@@ -317,18 +323,62 @@ def getBooksByLimit(LIMIT):
     return jsonify(result)
 
 
-# ******************** [3] Book Browsing & Sorting END *******************
+# ******************** [1] Book Browsing & Sorting *******************
+
+# ******************** [4] Wishlist ************************
+@app.route("/wishList/createWishList", methods=["POST"])
+def addWishlist():
+    # Fetch the POST request's fields
+    Title = request.json["Title"]
+    Books = request.json["Books"]
+
+    # Check if the wishlist title already exists
+    duplicate = db.session.query(exists().where(Wishlist.Title == Title)).scalar()
+
+    if duplicate:
+        return jsonify("Wishlist tile already in use.")
+
+    new_Wish = Wishlist(Title, Books)
+
+    db.session.add(new_Wish)
+    db.session.commit()
+
+    return new_Wish.product_schema.jsonify(new_Wish)
+
+
+@app.route("/wishList/<title>/<ISBN>", methods=["PUT"])
+def addWishBook(title, ISBN):
+    some_List = Wishlist.query.get(title)
+    out = some_List.addBookToWish(ISBN)
+    db.session.commit()
+
+    return jsonify(out)
+
+
+@app.route("/wishList/<title>", methods=["GET"])
+def getBookInList(title):
+    """Returns the books requested from a wishlist."""
+    wish = Wishlist.query.filter_by(Title=title).first()
+
+    if wish is None:
+        return jsonify(None)
+
+    return Wishlist.product_schema.jsonify(wish)
+
+
+@app.route("/wishList/<title>/<ISBN>", methods=["DELETE"])
+def removeBookInList(title, ISBN):
+
+    some_List = Wishlist.query.get(title)
+    out = some_List.removeBookInList(ISBN)
+    db.session.commit()
+
+    return jsonify(out)
+
 
 # ******************** [4] Wishlist ************************
 
-
-
-
-
-
-# ******************** [4] Wishlist END ************************
-
-# *********************[5] Shopping Cart *******************
+# *********************[6] Shopping Cart *******************
 @app.route("/admin/ShoppingCart", methods=["POST"])
 def createShoppingCart():
     """Handles adding a shopping cart to the database"""
@@ -408,10 +458,50 @@ def getListFromShoppingCart(id):
     return jsonify(result)
 
 
-# *********************[5] Shopping Cart END *******************
+# *********************[6] Shopping Cart *******************
 
-# *********************[6] Rating **************************
+# *********************[7] Rating and comments *******************
+@app.route("/books/rate", methods=["POST"])
+def createBookRating():
+    """Create a rating and comment on a book"""
+    book_isbn = request.json["isbn"]
+    rating = request.json["rating"]
+    comment = request.json["comment"]
+    username = request.json["username"]
+    user = Profile.query.filter_by(UserName=username).first()
+    if user is None:
+        return jsonify(None)
+    curr_time = datetime.datetime.now()
+    new_rating = Rate(book_isbn, username, rating, comment, curr_time)
+    db.session.add(new_rating)
+    db.session.commit()
+    return new_rating.product_schema.jsonify(new_rating)
 
 
+@app.route("/books/topRating", methods=["GET"])
+def getBooksTopRating():
+    """Returns a json with all books ordered by rating"""
 
-# *********************[6] Rating END **************************
+    # Query
+    top_rating_books = Rate.query.order_by(Rate.rating.desc())
+
+    result = Rate.products_schema.dump(top_rating_books)
+
+    # Returns X books in the DB as json
+    return jsonify(result)
+
+
+@app.route("/book/<ISBN>/averageRating", methods=["GET"])
+def getAverageRating(ISBN):
+    """Returns a average rating json with book given ISBN"""
+
+    # Query
+    avg_rating_books = (
+        db.session.query(func.avg(Rate.rating)).filter_by(isbn=ISBN).first()
+    )
+
+    # Returns X books in the DB as json
+    return jsonify({"rating": avg_rating_books[0]})
+
+
+# *********************[7] Rating and comments *******************
