@@ -1,4 +1,6 @@
 #Grecia Lara
+from datetime import datetime
+from app import db
 from __main__ import db, ma, app
 
 class Book(db.Model):
