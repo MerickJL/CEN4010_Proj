@@ -1,7 +1,5 @@
 #Grecia Lara
-# app/models.py
-from datetime import datetime
-from app import db
+from __main__ import db, ma, app
 
 class Book(db.Model):
     id = db.Column(db.Integer, primary_key=True)
