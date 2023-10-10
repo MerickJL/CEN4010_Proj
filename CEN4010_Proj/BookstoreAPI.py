@@ -3,7 +3,6 @@ import os
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
-
 # Flask app
 app = Flask(__name__)
 DBPATH = "sqlite:///" + os.path.join(
@@ -25,8 +24,8 @@ ma = Marshmallow(app)
 We are going to keep classes in separate files. This way it will be easier to
 maintain and integrate new features. Please be sure to name classes uniquely.
 """
-import components.views  # noqa:402
-
+#import components.views  # noqa:402
+import components.views_sachin # noqa:402
 
 if __name__ == "__main__":
     with app.app_context():
