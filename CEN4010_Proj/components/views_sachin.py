@@ -2,7 +2,7 @@ import datetime
 import re
 from flask import Flask, request, jsonify,make_response
 from sqlalchemy import exists, func
-from __main__ import db, app
+from __main__ import  app
 
 from components.BookDetails import Book
 
