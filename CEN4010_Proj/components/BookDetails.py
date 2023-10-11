@@ -1,19 +1,7 @@
 #Sachin Konar
-import sys
-print(sys.path)
 
-from flask import Flask, request, jsonify
-from flask_sqlalchemy import SQLAlchemy
-from flask_marshmallow import Marshmallow
 from marshmallow import fields
 from __main__ import db, ma, app
-
-# Flask app
-#app = Flask(__name__)
-#app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///book.db'  # SQLite database
-
-# Initialize Marshmallow
-#ma = Marshmallow(app)
 
 class BookSchema(ma.Schema):
     price = fields.Float()  
