@@ -3,11 +3,9 @@
 from marshmallow import fields
 from __main__ import db, ma, app
 
-
 class BookSchema(ma.Schema):
     price = fields.Float()  
-    class Meta:
-        
+    class Meta:    
         fields = ("id","isbn", "name","description", "genre", "copies_sold", "book_rating", "price","publisher","author","year_published")
 
 # Initialize schema
@@ -38,9 +36,7 @@ class Book(db.Model):
         self.publisher = publisher
         self.author = author
         self.year_published = year_published
-        
-
-    #tested
+    
     @classmethod
     def update_discount_book(cls, publisher,discount_percent):
         with app.app_context():
@@ -52,9 +48,7 @@ class Book(db.Model):
             return affected_rows
         else:
             return None
-
-
-
+            
     @classmethod
     def search_books_by_genre_JSON(cls, genre):
         with app.app_context():
@@ -105,7 +99,6 @@ class Book(db.Model):
         else:
             return None
 
-    
     @classmethod
     def search_books_by_book_rating_JSON(cls, book_rating):
         with app.app_context():
@@ -176,9 +169,5 @@ class Book(db.Model):
             db.session.commit()        
         
         return len(books_to_update)
-
-
-
-
 
 #Book.display_all_books()

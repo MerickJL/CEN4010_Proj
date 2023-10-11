@@ -144,6 +144,69 @@ def getBooksByAuthor(AUTHOR):
     # Returns all the DB items as json
     return jsonify(byAuthor)
 
+# Get all books 
+@app.route("/admin/books", methods=["GET"])
+def getBooks():
+
+    """Returns a json with all the books in the database"""
+    
+    books = Book.display_all_books()
+    if books:
+        return make_response(books, 200)
+    else:
+        return jsonify({"message": "No books found"}), 404
+        
+@app.route("/books/genre/<GENRE>", methods=["GET"])
+def getBooksByGenre(GENRE):
+    """Handles getting books by genre from the database"""
+
+    books = Book.search_books_by_genre_JSON(GENRE)
+    if books:
+        return make_response(books, 200)
+    else:
+        return jsonify({"message": f"No books found for the genre {GENRE}"}), 404
+
+
+@app.route("/books/topSellers", methods=["GET"])
+def getBooksByTopSellers():
+    """Handles getting books by top sellers from the database"""
+    books = Book.search_top_ten_book_count_JSON()
+    if books:
+        return make_response(books, 200)
+    else:
+        return jsonify({"message": "No books found"}), 404
+    
+
+@app.route("/books/rating/<RATING>", methods=["GET"])
+def getBooksByRating(RATING):
+    """Handles getting books by a rating or higher from the database"""
+    books = Book.search_books_by_book_rating_JSON(RATING)
+    if books:
+        return make_response(books, 200)
+    else:
+        return jsonify({"message": f"No books found for the rating {RATING}"}), 404   
+
+# Update discount prices by publisher
+@app.route('/discount_books', methods=['PUT', 'PATCH'])
+def discount_books_by_publisher():
+    discount_percent = request.json.get('discount_percent')
+    publisher = request.json.get('publisher')
+    
+    if not discount_percent or not publisher:
+        return jsonify({"message": "Missing parameters"}), 400
+
+    affected_rows = Book.update_discount_price_by_publisher(publisher,discount_percent)
+
+    if affected_rows:
+        return jsonify({"message": f"Discount applied to {affected_rows} books from {publisher}."}), 200
+    else:
+        return jsonify({"message": f"No books found from publisher {publisher}"}), 404
+
+    
+#Book.add_book(isbn=1089, name='The Lark', genre='Fiction', copies_sold=1000, book_rating=5, price=19.99,publisher="Barrons",author="Stine",year_published=2001,description="a stolid book")
+#Book.add_book(isbn=2678, name='The White Pond', genre='Mystery', copies_sold=1005, book_rating=4, price=20.99,publisher="Kaplan",author="Steiner",year_published=2011,description="a nonfiction book")
+#Book.add_book(isbn=3890, name='Death of Piano Man', genre='Fantasy', copies_sold=1078, book_rating=3, price=31.99,publisher="McGriffin",author="Henry",year_published=1998,description="a fiction book")
+#Book.add_book(isbn=4789, name='Candy Dog', genre='Mystery', copies_sold=1178, book_rating=3, price=15.99,publisher="McGriffin",author="Thomas",year_published=1987,description="a solemn book")
 
 # ******************** [4] Book Details ********************
 
@@ -461,47 +524,73 @@ def getListFromShoppingCart(id):
 # *********************[6] Shopping Cart *******************
 
 # *********************[7] Rating and comments *******************
-@app.route("/books/rate", methods=["POST"])
-def createBookRating():
-    """Create a rating and comment on a book"""
-    book_isbn = request.json["isbn"]
-    rating = request.json["rating"]
-    comment = request.json["comment"]
-    username = request.json["username"]
-    user = Profile.query.filter_by(UserName=username).first()
-    if user is None:
-        return jsonify(None)
-    curr_time = datetime.datetime.now()
-    new_rating = Rate(book_isbn, username, rating, comment, curr_time)
-    db.session.add(new_rating)
-    db.session.commit()
-    return new_rating.product_schema.jsonify(new_rating)
 
+@book_bp.route('/books', methods=['GET'])
+def get_all_books():
+    books = Book.query.all()
+    book_data = [{'id': book.id, 'title': book.title, 'author': book.author} for book in books]
+    return jsonify(book_data)
 
-@app.route("/books/topRating", methods=["GET"])
-def getBooksTopRating():
-    """Returns a json with all books ordered by rating"""
+@book_bp.route('/book/<int:book_id>', methods=['GET'])
+def get_book(book_id):
+    book = Book.query.get_or_404(book_id)
+    book_data = {'id': book.id, 'title': book.title, 'author': book.author}
+    return jsonify(book_data)
 
-    # Query
-    top_rating_books = Rate.query.order_by(Rate.rating.desc())
+@book_bp.route('/book/<int:book_id>/ratings', methods=['GET'])
+def get_book_ratings(book_id):
+    ratings = Rating.query.filter_by(book_id=book_id).all()
+    rating_data = [{'id': rating.id, 'value': rating.value, 'user_id': rating.user_id, 'timestamp': rating.timestamp} for rating in ratings]
+    return jsonify(rating_data)
 
-    result = Rate.products_schema.dump(top_rating_books)
+@book_bp.route('/book/<int:book_id>/comments', methods=['GET'])
+def get_book_comments(book_id):
+    comments = Comment.query.filter_by(book_id=book_id).all()
+    comment_data = [{'id': comment.id, 'text': comment.text, 'user_id': comment.user_id, 'timestamp': comment.timestamp} for comment in comments]
+    return jsonify(comment_data)
 
-    # Returns X books in the DB as json
-    return jsonify(result)
+@book_bp.route('/book/<int:book_id>/average_rating', methods=['GET'])
+def get_average_rating(book_id):
+    average_rating = Rating.query.filter_by(book_id=book_id).with_entities(func.avg(Rating.value)).scalar()
+    return jsonify({'average_rating': average_rating})
 
+@book_bp.route('/book/<int:book_id>/rate', methods=['POST'])
+def rate_book(book_id):
+    book = Book.query.get_or_404(book_id)
+    data = request.get_json()
 
-@app.route("/book/<ISBN>/averageRating", methods=["GET"])
-def getAverageRating(ISBN):
-    """Returns a average rating json with book given ISBN"""
+    if 'value' not in data or 'user_id' not in data:
+        return jsonify({'error': 'Invalid request. Please provide value and user_id.'}), 400
 
-    # Query
-    avg_rating_books = (
-        db.session.query(func.avg(Rate.rating)).filter_by(isbn=ISBN).first()
-    )
+    rating_value = int(data['value'])
+    user_id = int(data['user_id'])
 
-    # Returns X books in the DB as json
-    return jsonify({"rating": avg_rating_books[0]})
+    if 1 <= rating_value <= 5:
+        rating = Rating(value=rating_value, book=book, user_id=user_id)
+        db.session.add(rating)
+        db.session.commit()
+        return jsonify({'message': 'Rating submitted successfully!'}), 201
+    else:
+        return jsonify({'error': 'Invalid rating value. Please choose a rating between 1 and 5.'}), 400
+
+@book_bp.route('/book/<int:book_id>/comment', methods=['POST'])
+def comment_book(book_id):
+    book = Book.query.get_or_404(book_id)
+    data = request.get_json()
+
+    if 'text' not in data or 'user_id' not in data:
+        return jsonify({'error': 'Invalid request. Please provide text and user_id.'}), 400
+
+    comment_text = data['text']
+    user_id = int(data['user_id'])
+
+    if comment_text:
+        comment = Comment(text=comment_text, book=book, user_id=user_id)
+        db.session.add(comment)
+        db.session.commit()
+        return jsonify({'message': 'Comment submitted successfully!'}), 201
+    else:
+        return jsonify({'error': 'Please enter a comment.'}), 400
 
 
 # *********************[7] Rating and comments *******************
