@@ -1,7 +1,6 @@
 import datetime
 import re
-from flask import Flask, request, jsonify,make_response
-from sqlalchemy import exists, func
+from flask import Flask, request, make_response
 from __main__ import  app
 
 from components.BookDetails import Book
@@ -25,7 +24,7 @@ def getBooks():
     if books:
         return make_response(books, 200)
     else:
-        return jsonify({"message": "No books found"}), 404
+        return make_response({"message": f"No books found"}, 404)
 
 
 # ******************** [1] Book Browsing & Sorting (Sachin's API call) *******************
@@ -39,8 +38,7 @@ def getBooksByGenre(GENRE):
     if books:
         return make_response(books, 200)
     else:
-        return jsonify({"message": f"No books found for the genre {GENRE}"}), 404
-
+        return make_response({"message": f"No books found for the genre {GENRE}"}, 404)
 
 @app.route("/books/topSellers", methods=["GET"])
 def getBooksByTopSellers():
@@ -49,8 +47,7 @@ def getBooksByTopSellers():
     if books:
         return make_response(books, 200)
     else:
-        return jsonify({"message": "No books found"}), 404
-    
+        return make_response({"message": f"No books found"}, 404)
 
 @app.route("/books/rating/<RATING>", methods=["GET"])
 def getBooksByRating(RATING):
@@ -59,8 +56,8 @@ def getBooksByRating(RATING):
     if books:
         return make_response(books, 200)
     else:
-        return jsonify({"message": f"No books found for the rating {RATING}"}), 404
-    
+        return make_response({"message": f"No books found for the rating {RATING}"}, 404)
+
 
 # Update discount prices by publisher
 @app.route('/discount_books', methods=['PUT', 'PATCH'])
@@ -69,15 +66,13 @@ def discount_books_by_publisher():
     publisher = request.json.get('publisher')
     
     if not discount_percent or not publisher:
-        return jsonify({"message": "Missing parameters"}), 400
-
+        return make_response({"message": f"Missing parameters"}, 400)
     affected_rows = Book.update_discount_price_by_publisher(publisher,discount_percent)
 
     if affected_rows:
-        return jsonify({"message": f"Discount applied to {affected_rows} books from {publisher}."}), 200
+        return make_response({"message": f"Discount applied to {affected_rows} books from {publisher}."}, 200)
     else:
-        return jsonify({"message": f"No books found from publisher {publisher}"}), 404
-
+        return make_response({"message": f"No books found from publisher {publisher}"}, 404)
     
 #Book.add_book(isbn=1089, name='The Lark', genre='Fiction', copies_sold=1000, book_rating=5, price=19.99,publisher="Barrons",author="Stine",year_published=2001,description="a stolid book")
 #Book.add_book(isbn=2678, name='The White Pond', genre='Mystery', copies_sold=1005, book_rating=4, price=20.99,publisher="Kaplan",author="Steiner",year_published=2011,description="a nonfiction book")

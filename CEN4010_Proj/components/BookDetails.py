@@ -102,7 +102,7 @@ class Book(db.Model):
    
     
     @classmethod
-    def searchBooksByPriceJSON(cls, price):
+    def search_books_by_price_JSON(cls, price):
         with app.app_context():
             book_entries = cls.query.filter_by(price=price).all()
 
