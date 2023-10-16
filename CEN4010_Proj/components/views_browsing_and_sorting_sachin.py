@@ -1,7 +1,7 @@
 from flask import request, make_response
 from __main__ import  app
 
-from components.BookDetails import Book
+from components.Browsing_and_sorting import Book
 
 """
 This file will contain all the routes with their functions. Make sure to add a
@@ -58,7 +58,7 @@ def getBooksByRating(RATING):
 
 
 # Update discount prices by publisher
-@app.route('/discount_books', methods=['PUT', 'PATCH'])
+@app.route('/books/discount_by_publisher', methods=['PATCH'])
 def discount_books_by_publisher():
     discount_percent = request.json.get('discount_percent')
     publisher = request.json.get('publisher')
