@@ -9,7 +9,7 @@ from components.Profile import Profile
 from components.Profile import CreditCards
 from components.ShoppingCart import ShoppingCart
 # from components.ShoppingCart import BookShopping
-from components.Rate import Rating
+from components.Rate import Rating, Comment
 from __main__ import db, app
 
 
