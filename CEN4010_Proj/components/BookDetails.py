@@ -51,6 +51,7 @@ class Book(db.Model):
         self.Sold = Sold
         self.Rating = Rating
 
+#Moved to Views.py
     # @classmethod
     # def add_book(cls, isbn, name,description, genre, copies_sold, book_rating, price,publisher,author,year_published):
     #     with app.app_context():
