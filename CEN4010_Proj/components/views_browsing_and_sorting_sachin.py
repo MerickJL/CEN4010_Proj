@@ -25,7 +25,7 @@ def getBooks():
         return make_response({"message": f"No books found"}, 404)
 
 
-# ******************** [1] Book Browsing & Sorting (Sachin's API call) *******************
+# ******************** [1] Book Browsing & Sorting *******************
 
 
 @app.route("/books/genre/<GENRE>", methods=["GET"])

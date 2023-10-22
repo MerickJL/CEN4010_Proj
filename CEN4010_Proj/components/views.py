@@ -2,7 +2,7 @@ import datetime
 import re
 from flask import Flask, request, jsonify
 from sqlalchemy import exists, func
-from components.BookDetails import Book
+from components.Browsing_and_sorting import Book
 from components.Author import Author
 from components.Wishlist import Wishlist
 from components.Profile import Profile
@@ -389,55 +389,52 @@ def getBooksByLimit(LIMIT):
 # ******************** [1] Book Browsing & Sorting *******************
 
 # ******************** [4] Wishlist ************************
-@app.route("/wishList/createWishList", methods=["POST"])
-def addWishlist():
+
+@app.route("/wishList", methods=["POST"])
+def create_wishlist():
     # Fetch the POST request's fields
-    Title = request.json["Title"]
-    Books = request.json["Books"]
-
+    title = request.json["title"]
+    
     # Check if the wishlist title already exists
-    duplicate = db.session.query(exists().where(Wishlist.Title == Title)).scalar()
+    existing_wishlist = Wishlist.query.filter_by(title=title).first()
+    if existing_wishlist:
+        return jsonify("Wishlist title already in use."), 400
 
-    if duplicate:
-        return jsonify("Wishlist tile already in use.")
-
-    new_Wish = Wishlist(Title, Books)
-
-    db.session.add(new_Wish)
+    new_wishlist = Wishlist(title)
+    db.session.add(new_wishlist)
     db.session.commit()
 
-    return new_Wish.product_schema.jsonify(new_Wish)
+    return new_wishlist.product_schema.jsonify(new_wishlist), 201
 
+@app.route("/wishList/<title>/books/<ISBN>", methods=["PUT"])
+def add_book_to_wishlist(title, ISBN):
+    wishlist = Wishlist.query.filter_by(title=title).first()
+    if not wishlist:
+        return jsonify(f"Wishlist {title} not found"), 404
 
-@app.route("/wishList/<title>/<ISBN>", methods=["PUT"])
-def addWishBook(title, ISBN):
-    some_List = Wishlist.query.get(title)
-    out = some_List.addBookToWish(ISBN)
+    message = wishlist.add_book(ISBN)
     db.session.commit()
 
-    return jsonify(out)
-
+    return jsonify(message)
 
 @app.route("/wishList/<title>", methods=["GET"])
-def getBookInList(title):
-    """Returns the books requested from a wishlist."""
-    wish = Wishlist.query.filter_by(Title=title).first()
+def get_books_in_wishlist(title):
+    wishlist = Wishlist.query.filter_by(title=title).first()
+    if not wishlist:
+        return jsonify(f"Wishlist {title} not found"), 404
 
-    if wish is None:
-        return jsonify(None)
+    return Wishlist.product_schema.jsonify(wishlist)
 
-    return Wishlist.product_schema.jsonify(wish)
+@app.route("/wishList/<title>/books/<ISBN>", methods=["DELETE"])
+def remove_book_from_wishlist2(title, ISBN):
+    Wishlist = Wishlist.query.filter_by(title=title).first()
+    if not wishlist:
+        return jsonify(f"Wishlist {title} not found"), 404
 
-
-@app.route("/wishList/<title>/<ISBN>", methods=["DELETE"])
-def removeBookInList(title, ISBN):
-
-    some_List = Wishlist.query.get(title)
-    out = some_List.removeBookInList(ISBN)
+    message = wishlist.remove_book(ISBN)
     db.session.commit()
 
-    return jsonify(out)
-
+    return jsonify(message)
 
 # ******************** [4] Wishlist ************************
 
@@ -447,78 +444,68 @@ def createShoppingCart():
     """Handles adding a shopping cart to the database"""
     User = request.json["User"]
 
-    # Create new book with fetched fields
-    shopping_cart = ShoppingCart(User)
+    # Check if the shopping cart for the user already exists
+    existing_cart = ShoppingCart.query.filter_by(User=User).first()
+    if existing_cart:
+        return jsonify("Shopping cart for this user already exists."), 400
 
-    # Only add book if it's unique
+    # Create new shopping cart with fetched fields
+    shopping_cart = ShoppingCart(User)
     db.session.add(shopping_cart)
     db.session.commit()
 
-    # Return new_book as json
-    return shopping_cart.product_schema.jsonify(shopping_cart)
+    return shopping_cart.product_schema.jsonify(shopping_cart), 201
 
 @app.route("/admin/getShoppingCart", methods=["GET"])
-def getShoppingCart():
-    """Returns a json with all the profile in the database"""
-    # Query
+def getAllShoppingCarts():
+    # Returns a json with all the shopping carts in the database
     all_ShoppingCart = ShoppingCart.query.all()
-
     result = ShoppingCart.products_schema.dump(all_ShoppingCart)
-
-    # Returns all the DB items as json
     return jsonify(result)
 
-@app.route("/admin/ShoppingCart/<userName>/<ISBN>", methods=["PUT"])
+@app.route("/admin/ShoppingCart/<userName>/books/<ISBN>", methods=["PUT"])
 def addBooksToShoppingCart(userName, ISBN):
-    # Attempt to find the user's shopping cart based on userName
+    shopping_cart = ShoppingCart.query.filter_by(User=userName).first()
+    if not shopping_cart:
+        return jsonify(f"Shopping cart for user {userName} not found"), 404
 
-    someOwner = ShoppingCart.query.filter_by(User=userName).first()
+    book = Book.query.get(ISBN)
+    if not book:
+        return jsonify(f"Book with ISBN {ISBN} not found"), 404
 
-    exist = db.session.query(exists().where(Book.ISBN == ISBN)).scalar()
+    if book in shopping_cart.books:
+        return jsonify(f"Book with ISBN {ISBN} is already in the shopping cart"), 400
 
-    if exist:
-        aBook = Book.query.filter_by(ISBN=ISBN).first()
-    else:
-        return jsonify("ERROR: Book does not exist")
-
-    temp = BookShopping(aBook)
-    temp.ownerId = someOwner.id
-    temp.bookId = aBook.id
-
-    db.session.add(temp)
+    shopping_cart.books.append(book)
     db.session.commit()
 
-    return temp.product_schema.jsonify(temp)
+    return jsonify(f"Book with ISBN {ISBN} added to shopping cart"), 200
 
-@app.route("/admin/ShoppingCart/<id>/<ISBN>", methods=["DELETE"])
-def deleteBookFromShoppingCart(id, ISBN):
-    result = " "
+@app.route("/admin/ShoppingCart/<userName>/books/<ISBN>", methods=["DELETE"])
+def removeBookFromShoppingCart(userName, ISBN):
+    shopping_cart = ShoppingCart.query.filter_by(User=userName).first()
+    if not shopping_cart:
+        return jsonify(f"Shopping cart for user {userName} not found"), 404
 
-    entry_to_delete = db.session.query(BookShopping).filter_by(ownerId=id, bookId=ISBN).first()
-    if entry_to_delete:
-        result = {
-            "id": entry_to_delete.id,
-            "ownerId": entry_to_delete.ownerId,
-            "bookId": entry_to_delete.bookId,
-            # Add other attributes as needed
-        }
-        db.session.delete(entry_to_delete)
-        db.session.commit()
-    else:
-        return jsonify("ERROR: Book does not exist")
+    book = Book.query.get(ISBN)
+    if not book:
+        return jsonify(f"Book with ISBN {ISBN} not found"), 404
 
-    # Returns all the DB items as json
-    return jsonify(result)
+    if book not in shopping_cart.books:
+        return jsonify(f"Book with ISBN {ISBN} is not in the shopping cart"), 400
 
-@app.route("/admin/ShoppingCart/<id>", methods=["GET"])
-def getListFromShoppingCart(id):
-    # Query the database to retrieve entries with ownerId equal to 5
-    all_profile = BookShopping.query.filter(BookShopping.ownerId == id).all()
+    shopping_cart.books.remove(book)
+    db.session.commit()
 
-    result = BookShopping.products_schema.dump(all_profile)
+    return jsonify(f"Book with ISBN {ISBN} removed from shopping cart"), 200
 
-    # Returns all the DB items as json
-    return jsonify(result)
+@app.route("/admin/ShoppingCart/<userName>", methods=["GET"])
+def getListFromShoppingCart(userName):
+    shopping_cart = ShoppingCart.query.filter_by(User=userName).first()
+    if not shopping_cart:
+        return jsonify(f"Shopping cart for user {userName} not found"), 404
+
+    return ShoppingCart.product_schema.jsonify(shopping_cart)
 
 
 # *********************[6] Shopping Cart *******************
