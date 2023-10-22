@@ -426,12 +426,12 @@ def get_books_in_wishlist(title):
     return Wishlist.product_schema.jsonify(wishlist)
 
 @app.route("/wishList/<title>/books/<ISBN>", methods=["DELETE"])
-def remove_book_from_wishlist2(title, ISBN):
+def remove_book_from_wishlist(title, ISBN):
     Wishlist = Wishlist.query.filter_by(title=title).first()
-    if not wishlist:
+    if not Wishlist:
         return jsonify(f"Wishlist {title} not found"), 404
 
-    message = wishlist.remove_book(ISBN)
+    message = Wishlist.remove_book(ISBN)
     db.session.commit()
 
     return jsonify(message)
