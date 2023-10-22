@@ -1,14 +1,14 @@
 import datetime
 import re
 from flask import Flask, request, jsonify
+from flask import request, make_response
 from sqlalchemy import exists, func
 from components.Browsing_and_sorting import Book
-#from components.Author import Author -> Commented out for now as there is no reference to Author
 from components.Wishlist import Wishlist
 from components.Profile import Profile
 from components.Profile import CreditCards
 from components.ShoppingCart import ShoppingCart
-from components.ShoppingCart import BookShopping
+# from components.ShoppingCart import BookShopping
 from components.Rate import Rate
 from __main__ import db, app
 
@@ -21,7 +21,7 @@ single file, make sure you are naming each function uniquely.
 """
 
 
-# ******************** [4] Book Details ********************
+# ******************** [1] Book Details ********************
 @app.route("/admin/books", methods=["POST"])
 def addBook():
     """Handles adding a book to the database"""
@@ -67,46 +67,6 @@ def getBooks():
     # Returns all the DB items as json
     return jsonify(result)
 
-
-@app.route("/authors", methods=["GET"])
-def getAuthors():
-    """Returns a json with all the books in the database"""
-    # Query
-    all_authors = Author.query.all()
-
-    result = Author.products_schema.dump(all_authors)
-
-    # Returns all the DB items as json
-    return jsonify(result)
-
-
-@app.route("/admin/createAuthor", methods=["POST"])
-def createAuthor():
-    """Handles adding an author to the database"""
-    # Fetch the POST request's fields
-    FName = request.json["FirstName"]
-    LName = request.json["LastName"]
-    Biography = request.json["Biography"]
-    Publisher = request.json["Publisher"]
-
-    # Check if the author exists in the DB
-    dupFName = db.session.query(exists().where(Author.FirstName == FName)).scalar()
-    dupLName = db.session.query(exists().where(Author.LastName == LName)).scalar()
-
-    if dupFName and dupLName:
-        return jsonify("Author is already in the database.")
-
-    # Create new book with fetched fields
-    new_author = Author(FName, LName, Biography, Publisher)
-
-    # Only add book if it's unique
-    db.session.add(new_author)
-    db.session.commit()
-
-    # Return new_book as json
-    return new_author.product_schema.jsonify(new_author)
-
-
 @app.route("/books/<ISBN>", methods=["GET"])
 def getBookByISBN(ISBN):
     """Returns the book requested by the specific ISBN route"""
@@ -116,33 +76,6 @@ def getBookByISBN(ISBN):
         return jsonify(None)
 
     return Book.product_schema.jsonify(book)
-
-
-@app.route("/books/author/<AUTHOR>", methods=["GET"])
-def getBooksByAuthor(AUTHOR):
-    """Retrieve a list of books associated with an author"""
-    # Get all books
-    all_books = Book.query.all()
-
-    # Append the book if its author was specified on the URL
-    byAuthor = [
-        Book.product_schema.dump(book)
-        for book in all_books
-        if book.Author.replace(" ", "") == AUTHOR  # noqa:
-    ]
-
-    # Check that the author has books in the database. If no books are found
-    # by the author, return a json message saying so, and suggest authors.
-    all_authors = Author.products_schema.dump(Author.query.all())
-    if len(byAuthor) == 0:
-        return jsonify(
-            "No books written by this author in the database.",
-            "Here is a list of authors recorded: ",
-            all_authors,
-        )
-
-    # Returns all the DB items as json
-    return jsonify(byAuthor)
 
 # Get all books 
 @app.route("/admin/books", methods=["GET"])
@@ -166,7 +99,6 @@ def getBooksByGenre(GENRE):
     else:
         return jsonify({"message": f"No books found for the genre {GENRE}"}), 404
 
-
 @app.route("/books/topSellers", methods=["GET"])
 def getBooksByTopSellers():
     """Handles getting books by top sellers from the database"""
@@ -175,7 +107,6 @@ def getBooksByTopSellers():
         return make_response(books, 200)
     else:
         return jsonify({"message": "No books found"}), 404
-    
 
 @app.route("/books/rating/<RATING>", methods=["GET"])
 def getBooksByRating(RATING):
@@ -208,7 +139,7 @@ def discount_books_by_publisher():
 #Book.add_book(isbn=3890, name='Death of Piano Man', genre='Fantasy', copies_sold=1078, book_rating=3, price=31.99,publisher="McGriffin",author="Henry",year_published=1998,description="a fiction book")
 #Book.add_book(isbn=4789, name='Candy Dog', genre='Mystery', copies_sold=1178, book_rating=3, price=15.99,publisher="McGriffin",author="Thomas",year_published=1987,description="a solemn book")
 
-# ******************** [4] Book Details ********************
+# ******************** [1] Book Details ********************
 
 # ******************** [2] Profile Management ********************
 @app.route("/profile/createUser", methods=["POST"])
@@ -266,7 +197,6 @@ def getUserByUsername(userName):
 
     return Profile.product_schema.jsonify(user)
 
-
 @app.route("/profile/<userName>", methods=["PUT"])
 def updateUser(userName):
     user = Profile.query.filter_by(UserName=userName).first()
@@ -288,7 +218,6 @@ def updateUser(userName):
 
     # Update user fields
     return user.product_schema.jsonify(user)
-
 
 @app.route("/profile/<userName>/creditcards", methods=["POST"])
 def addCards(userName):
@@ -335,8 +264,7 @@ def viewCards(userName):
 
 # ******************** [2] Profile Management ********************
 
-
-# ******************** [1] Book Browsing & Sorting *******************
+# ******************** [3] Book Browsing & Sorting *******************
 @app.route("/books/genre/<GENRE>", methods=["GET"])
 def getBooksByGenre(GENRE):
     """Handles getting books by genre from the database"""
@@ -386,7 +314,7 @@ def getBooksByLimit(LIMIT):
     return jsonify(result)
 
 
-# ******************** [1] Book Browsing & Sorting *******************
+# ******************** [3] Book Browsing & Sorting *******************
 
 # ******************** [4] Wishlist ************************
 
@@ -438,7 +366,7 @@ def remove_book_from_wishlist(title, ISBN):
 
 # ******************** [4] Wishlist ************************
 
-# *********************[6] Shopping Cart *******************
+# *********************[5] Shopping Cart *******************
 @app.route("/admin/ShoppingCart", methods=["POST"])
 def createShoppingCart():
     """Handles adding a shopping cart to the database"""
@@ -508,40 +436,40 @@ def getListFromShoppingCart(userName):
     return ShoppingCart.product_schema.jsonify(shopping_cart)
 
 
-# *********************[6] Shopping Cart *******************
+# *********************[5] Shopping Cart *******************
 
-# *********************[7] Rating and comments *******************
+# *********************[6] Rating and comments *******************
 
-@book_bp.route('/books', methods=['GET'])
+@app.route('/books', methods=['GET'])
 def get_all_books():
     books = Book.query.all()
     book_data = [{'id': book.id, 'title': book.title, 'author': book.author} for book in books]
     return jsonify(book_data)
 
-@book_bp.route('/book/<int:book_id>', methods=['GET'])
+@app.route('/book/<int:book_id>', methods=['GET'])
 def get_book(book_id):
     book = Book.query.get_or_404(book_id)
     book_data = {'id': book.id, 'title': book.title, 'author': book.author}
     return jsonify(book_data)
 
-@book_bp.route('/book/<int:book_id>/ratings', methods=['GET'])
+@app.route('/book/<int:book_id>/ratings', methods=['GET'])
 def get_book_ratings(book_id):
     ratings = Rating.query.filter_by(book_id=book_id).all()
     rating_data = [{'id': rating.id, 'value': rating.value, 'user_id': rating.user_id, 'timestamp': rating.timestamp} for rating in ratings]
     return jsonify(rating_data)
 
-@book_bp.route('/book/<int:book_id>/comments', methods=['GET'])
+@app.route('/book/<int:book_id>/comments', methods=['GET'])
 def get_book_comments(book_id):
     comments = Comment.query.filter_by(book_id=book_id).all()
     comment_data = [{'id': comment.id, 'text': comment.text, 'user_id': comment.user_id, 'timestamp': comment.timestamp} for comment in comments]
     return jsonify(comment_data)
 
-@book_bp.route('/book/<int:book_id>/average_rating', methods=['GET'])
+@app.route('/book/<int:book_id>/average_rating', methods=['GET'])
 def get_average_rating(book_id):
     average_rating = Rating.query.filter_by(book_id=book_id).with_entities(func.avg(Rating.value)).scalar()
     return jsonify({'average_rating': average_rating})
 
-@book_bp.route('/book/<int:book_id>/rate', methods=['POST'])
+@app.route('/book/<int:book_id>/rate', methods=['POST'])
 def rate_book(book_id):
     book = Book.query.get_or_404(book_id)
     data = request.get_json()
@@ -560,7 +488,7 @@ def rate_book(book_id):
     else:
         return jsonify({'error': 'Invalid rating value. Please choose a rating between 1 and 5.'}), 400
 
-@book_bp.route('/book/<int:book_id>/comment', methods=['POST'])
+@app.route('/book/<int:book_id>/comment', methods=['POST'])
 def comment_book(book_id):
     book = Book.query.get_or_404(book_id)
     data = request.get_json()
@@ -580,4 +508,4 @@ def comment_book(book_id):
         return jsonify({'error': 'Please enter a comment.'}), 400
 
 
-# *********************[7] Rating and comments *******************
+# *********************[6] Rating and comments *******************
