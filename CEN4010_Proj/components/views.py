@@ -1,7 +1,6 @@
 import datetime
 import re
-from flask import Flask, request, jsonify
-from flask import request, make_response
+from flask import Flask, request, jsonify, make_response
 from sqlalchemy import exists, func
 from components.Browsing_and_sorting import Book
 from components.Wishlist import Wishlist
