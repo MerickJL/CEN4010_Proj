@@ -27,8 +27,6 @@ def update_discount_book(cls, publisher,discount_percent):
     else:
         return None
 
-
-
 @classmethod
 def search_books_by_genre_JSON(cls, genre):
     with app.app_context():
