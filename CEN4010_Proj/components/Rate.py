@@ -1,6 +1,5 @@
 #Grecia Lara
 from datetime import datetime
-#from app import db -> Commented out because you are importing db from __main__ already
 from __main__ import db, ma, app
 
 #Commented out for time being for debugging due to having 2 Book(db.Models)
