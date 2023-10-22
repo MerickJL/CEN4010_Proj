@@ -10,15 +10,6 @@ from components.ShoppingCart import BookShopping
 from components.Rate import Rating, Comment
 from __main__ import db, app
 
-
-"""
-This file will contain all the routes with their functions. Make sure to add a
-separator for your own section.
-It is easier to maintain and check for conflicts if all the routes are in a
-single file, make sure you are naming each function uniquely.
-"""
-
-
 # ******************** [1] Book Details ********************
 @app.route("/admin/books", methods=["POST"])
 def add_Book():
@@ -63,6 +54,9 @@ def display_all_books():
     # Returns all the DB items as json
     return jsonify(result)
 
+# ******************** [1] Book Details ********************
+
+# ******************** [2] Book Sorting********************
 @app.route("/books/<ISBN>", methods=["GET"])
 def getBookByISBN(ISBN):
     """Returns the book requested by the specific ISBN route"""
@@ -168,9 +162,9 @@ def discount_books_by_publisher():
 #Book.add_book(isbn=3890, name='Death of Piano Man', genre='Fantasy', copies_sold=1078, book_rating=3, price=31.99,publisher="McGriffin",author="Henry",year_published=1998,description="a fiction book")
 #Book.add_book(isbn=4789, name='Candy Dog', genre='Mystery', copies_sold=1178, book_rating=3, price=15.99,publisher="McGriffin",author="Thomas",year_published=1987,description="a solemn book")
 
-# ******************** [1] Book Details ********************
+# ******************** [2] Book Sorting ********************
 
-# ******************** [2] Profile Management ********************
+# ******************** [3] Profile Management ********************
 @app.route("/profile/createUser", methods=["POST"])
 def addUser():
     """Handles creating a user profile in the databse"""
@@ -291,9 +285,9 @@ def viewCards(userName):
     # Returns all the DB items as json
     return jsonify(result)
 
-# ******************** [2] Profile Management ********************
+# ******************** [3] Profile Management ********************
 
-# ******************** [3] Wishlist ************************
+# ******************** [4] Wishlist ************************
 @app.route("/wishList", methods=["POST"])
 def create_wishlist():
     # Fetch the POST request's fields
@@ -340,9 +334,9 @@ def remove_book_from_wishlist(title, ISBN):
 
     return jsonify(message)
 
-# ******************** [3] Wishlist ************************
+# ******************** [4] Wishlist ************************
 
-# *********************[4] Shopping Cart *******************
+# *********************[5] Shopping Cart *******************
 @app.route("/admin/ShoppingCart", methods=["POST"])
 def createShoppingCart():
     """Handles adding a shopping cart to the database"""
@@ -411,9 +405,9 @@ def getListFromShoppingCart(userName):
 
     return ShoppingCart.product_schema.jsonify(shopping_cart)
 
-# *********************[4] Shopping Cart *******************
+# *********************[5] Shopping Cart *******************
 
-# *********************[5] Rating and comments *******************
+# *********************[6] Rating and comments *******************
 @app.route('/book/<int:book_id>', methods=['GET'])
 def get_book(book_id):
     book = Book.query.get_or_404(book_id)
@@ -475,4 +469,4 @@ def comment_book(book_id):
     else:
         return jsonify({'error': 'Please enter a comment.'}), 400
 
-# *********************[5] Rating and comments *******************
+# *********************[6] Rating and comments *******************
