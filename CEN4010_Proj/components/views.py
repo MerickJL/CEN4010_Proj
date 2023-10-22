@@ -3,7 +3,7 @@ import re
 from flask import Flask, request, jsonify
 from sqlalchemy import exists, func
 from components.Browsing_and_sorting import Book
-from components.Author import Author
+#from components.Author import Author -> Commented out for now as there is no reference to Author
 from components.Wishlist import Wishlist
 from components.Profile import Profile
 from components.Profile import CreditCards
