@@ -8,7 +8,6 @@ from components.Profile import Profile, CreditCards
 from components.ShoppingCart import ShoppingCart
 from components.ShoppingCart import BookShopping
 from components.Rate import Rating, Comment
-from components.BookDetails import Book
 from __main__ import db, app
 
 
