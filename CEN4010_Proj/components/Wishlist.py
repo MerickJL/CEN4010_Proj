@@ -1,5 +1,5 @@
 from __main__ import db, ma
-from components.Browsing_and_sorting import Book
+from components.BookDetails import Book
 
 wishlist_books_association = db.Table('wishlist_books',
     db.Column('wishlist_id', db.Integer, db.ForeignKey('wishlist.id')),
