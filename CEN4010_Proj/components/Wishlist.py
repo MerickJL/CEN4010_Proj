@@ -1,4 +1,3 @@
-#Ernesto
 from __main__ import db, ma
 from components.Browsing_and_sorting import Book
 

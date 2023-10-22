@@ -2,7 +2,7 @@
 
 from marshmallow import fields
 from __main__ import db, ma, app
-
+from components.BookDetails import Book
 
 class BookSchema(ma.Schema):
     price = fields.Float()  
