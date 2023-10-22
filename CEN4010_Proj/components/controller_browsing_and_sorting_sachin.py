@@ -1,7 +1,7 @@
 from flask import request, make_response
 from __main__ import  app
 
-from components.Browsing_and_sorting import Book
+from components.model_browsing_and_sorting_sachin import Book
 
 """
 This file will contain all the routes with their functions. Make sure to add a
