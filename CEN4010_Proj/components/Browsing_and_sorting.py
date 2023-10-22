@@ -2,44 +2,11 @@
 
 from marshmallow import fields
 from __main__ import db, ma, app
-from components.BookDetails import Book
+from components.BookDetails import Book, books_schema
 
-class BookSchema(ma.Schema):
-    price = fields.Float()  
-    class Meta:
+
+class Browsing_and_Sorting:
         
-        fields = ("id","isbn", "name","description", "genre", "copies_sold", "book_rating", "price","publisher","author","year_published")
-
-# Initialize schema
-book_schema = BookSchema()
-books_schema = BookSchema(many=True)  # To handle multiple Book objects
-#db = SQLAlchemy(app)
-class Book(db.Model):
-    id = db.Column(db.Integer, primary_key=True, nullable=False)
-    isbn = db.Column(db.Integer, unique=True, nullable=False)
-    name = db.Column(db.String(120), unique=True, nullable=False)
-    description = db.Column(db.String(80), unique=False, nullable=False)
-    genre = db.Column(db.String(80), unique=False, nullable=False)
-    copies_sold = db.Column(db.Integer, unique=False, nullable=False)
-    book_rating = db.Column(db.Integer, unique=False, nullable=False)
-    price = db.Column(db.Numeric(6, 2), unique=False, nullable=False)
-    publisher = db.Column(db.String(80), unique=False, nullable=False)
-    author = db.Column(db.String(80), unique=False, nullable=False)
-    year_published = db.Column(db.Integer, unique=False, nullable=False)
-
-    def __init__(self, isbn, name,description, genre, copies_sold, book_rating, price,publisher,author,year_published):
-        self.isbn = isbn
-        self.name = name
-        self.description=description
-        self.genre = genre
-        self.copies_sold = copies_sold
-        self.book_rating = book_rating
-        self.price = price
-        self.publisher = publisher
-        self.author = author
-        self.year_published = year_published
-        
-
     #tested
     @classmethod
     def update_discount_book(cls, publisher,discount_percent):
@@ -52,8 +19,6 @@ class Book(db.Model):
             return affected_rows
         else:
             return None
-
-
 
     @classmethod
     def search_books_by_genre_JSON(cls, genre):
@@ -94,7 +59,6 @@ class Book(db.Model):
         else:
              return None
    
-    
     @classmethod
     def search_books_by_price_JSON(cls, price):
         with app.app_context():
@@ -105,7 +69,6 @@ class Book(db.Model):
         else:
             return None
 
-    
     @classmethod
     def search_books_by_book_rating_JSON(cls, book_rating):
         with app.app_context():
@@ -135,7 +98,8 @@ class Book(db.Model):
              return books_schema.dumps(book_entries)
         else:
             return None
-        
+    
+    """ ------->> These two were commented out because they were moved to BookDetails.py   
     @classmethod
     def add_book(cls, isbn, name,description, genre, copies_sold, book_rating, price,publisher,author,year_published):
         with app.app_context():
@@ -148,7 +112,7 @@ class Book(db.Model):
                 return new_book
             else:
                 return None  
-
+                
     @classmethod
     def display_all_books(cls):
         with app.app_context():
@@ -158,7 +122,8 @@ class Book(db.Model):
              return books_schema.dumps(book_entries)
             else:
                 return None
-    
+    """
+
     @classmethod
     def update_discount_price_by_publisher(cls,publisher,discount_percent):
         with app.app_context():
@@ -178,7 +143,3 @@ class Book(db.Model):
         return len(books_to_update)
 
 
-
-
-
-#Book.display_all_books()
