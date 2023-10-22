@@ -76,16 +76,16 @@ def getBookByISBN(ISBN):
     return Book.product_schema.jsonify(book)
 
 # Get all books 
-@app.route("/admin/books", methods=["GET"])
-def getBooks():
+# @app.route("/admin/books", methods=["GET"])
+# def getBooks():
 
-    """Returns a json with all the books in the database"""
+#     """Returns a json with all the books in the database"""
     
-    books = Book.display_all_books()
-    if books:
-        return make_response(books, 200)
-    else:
-        return jsonify({"message": "No books found"}), 404
+#     books = Book.display_all_books()
+#     if books:
+#         return make_response(books, 200)
+#     else:
+#         return jsonify({"message": "No books found"}), 404
         
 @app.route("/books/genre/<GENRE>", methods=["GET"])
 def getBooksByGenre(GENRE):
@@ -130,53 +130,54 @@ def discount_books_by_publisher():
         return jsonify({"message": f"Discount applied to {affected_rows} books from {publisher}."}), 200
     else:
         return jsonify({"message": f"No books found from publisher {publisher}"}), 404
-@app.route("/books/genre/<GENRE>", methods=["GET"])
-def getBooksByGenre(GENRE):
-    """Handles getting books by genre from the database"""
+    
+# @app.route("/books/genre/<GENRE>", methods=["GET"])
+# def getBooksByGenre(GENRE):
+#     """Handles getting books by genre from the database"""
 
-    # Get books by genre from db
-    books = Book.query.filter(Book.Genre == GENRE)
+#     # Get books by genre from db
+#     books = Book.query.filter(Book.Genre == GENRE)
 
-    # Return books by genre as json
-    results = Book.products_schema.dump(books)
-    return jsonify(results)
-
-
-@app.route("/books/topSellers", methods=["GET"])
-def getBooksByTopSellers():
-    """Handles getting books by top sellers from the database"""
-
-    # Get books by top sellers from db
-    books = Book.query.order_by(Book.Sold.desc()).limit(10)
-
-    # Return books by top sellers as json
-    results = Book.products_schema.dump(books)
-    return jsonify(results)
+#     # Return books by genre as json
+#     results = Book.products_schema.dump(books)
+#     return jsonify(results)
 
 
-@app.route("/books/rating/<RATING>", methods=["GET"])
-def getBooksByRating(RATING):
-    """Handles getting books by a rating or higher from the database"""
+# @app.route("/books/topSellers", methods=["GET"])
+# def getBooksByTopSellers():
+#     """Handles getting books by top sellers from the database"""
 
-    # Get books by a specific rating or higher from db
-    books = Book.query.filter(Book.Rating >= RATING)
+#     # Get books by top sellers from db
+#     books = Book.query.order_by(Book.Sold.desc()).limit(10)
 
-    # Return books by a specific rating or higher as json
-    results = Book.products_schema.dump(books)
-    return jsonify(results)
+#     # Return books by top sellers as json
+#     results = Book.products_schema.dump(books)
+#     return jsonify(results)
 
 
-@app.route("/books/limit/<LIMIT>", methods=["GET"])
-def getBooksByLimit(LIMIT):
-    """Returns a json with X books where X is an int in the database"""
+# @app.route("/books/rating/<RATING>", methods=["GET"])
+# def getBooksByRating(RATING):
+#     """Handles getting books by a rating or higher from the database"""
 
-    # Query
-    all_books = Book.query.order_by(Book.Name.asc()).limit(LIMIT)
+#     # Get books by a specific rating or higher from db
+#     books = Book.query.filter(Book.Rating >= RATING)
 
-    result = Book.products_schema.dump(all_books)
+#     # Return books by a specific rating or higher as json
+#     results = Book.products_schema.dump(books)
+#     return jsonify(results)
 
-    # Returns X books in the DB as json
-    return jsonify(result)
+
+# @app.route("/books/limit/<LIMIT>", methods=["GET"])
+# def getBooksByLimit(LIMIT):
+#     """Returns a json with X books where X is an int in the database"""
+
+#     # Query
+#     all_books = Book.query.order_by(Book.Name.asc()).limit(LIMIT)
+
+#     result = Book.products_schema.dump(all_books)
+
+#     # Returns X books in the DB as json
+#     return jsonify(result)
 
     
 #Book.add_book(isbn=1089, name='The Lark', genre='Fiction', copies_sold=1000, book_rating=5, price=19.99,publisher="Barrons",author="Stine",year_published=2001,description="a stolid book")
