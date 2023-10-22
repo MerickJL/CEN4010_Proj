@@ -2,7 +2,6 @@
 from __main__ import db, ma
 from components.Browsing_and_sorting import Book
 
-# Association table for many-to-many relationship between Wishlist and Book
 wishlist_books_association = db.Table('wishlist_books',
     db.Column('wishlist_id', db.Integer, db.ForeignKey('wishlist.id')),
     db.Column('book_id', db.Integer, db.ForeignKey('book.id'))
@@ -14,13 +13,11 @@ class Wishlist(db.Model):
         class Meta:
             fields = ("id", "title", "books")
 
-    # Create DB fields
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(300), unique=True, nullable=False)
     books = db.relationship('Book', secondary=wishlist_books_association, lazy='subquery',
         backref=db.backref('wishlists', lazy=True))
 
-    # Product schema for single and multiple items
     product_schema = ProductSchema()
     products_schema = ProductSchema(many=True)
 
