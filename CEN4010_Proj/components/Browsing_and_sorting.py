@@ -4,41 +4,17 @@ from marshmallow import fields
 from __main__ import db, ma, app
 from components.BookDetails import Book
 
-# class BookSchema(ma.Schema):
-#     price = fields.Float()  
-#     class Meta:
+class BookSchema(ma.Schema):
+    price = fields.Float()  
+    class Meta:
     
-#         fields = ("id","isbn", "name","description", "genre", "copies_sold", "book_rating", "price","publisher","author","year_published")
+        fields = ("id","isbn", "name","description", "genre", "copies_sold", "book_rating", "price","publisher","author","year_published")
 
-# Initialize schema
-# book_schema = BookSchema()
-# books_schema = BookSchema(many=True)  # To handle multiple Book objects
+#Initialize schema
+book_schema = BookSchema()
+books_schema = BookSchema(many=True)  # To handle multiple Book objects
 #db = SQLAlchemy(app)
-# class Book(db.Model):
-#     id = db.Column(db.Integer, primary_key=True, nullable=False)
-#     isbn = db.Column(db.Integer, unique=True, nullable=False)
-#     name = db.Column(db.String(120), unique=True, nullable=False)
-#     description = db.Column(db.String(80), unique=False, nullable=False)
-#     genre = db.Column(db.String(80), unique=False, nullable=False)
-#     copies_sold = db.Column(db.Integer, unique=False, nullable=False)
-#     book_rating = db.Column(db.Integer, unique=False, nullable=False)
-#     price = db.Column(db.Numeric(6, 2), unique=False, nullable=False)
-#     publisher = db.Column(db.String(80), unique=False, nullable=False)
-#     author = db.Column(db.String(80), unique=False, nullable=False)
-#     year_published = db.Column(db.Integer, unique=False, nullable=False)
 
-#     def __init__(self, isbn, name,description, genre, copies_sold, book_rating, price,publisher,author,year_published):
-#         self.isbn = isbn
-#         self.name = name
-#         self.description=description
-#         self.genre = genre
-#         self.copies_sold = copies_sold
-#         self.book_rating = book_rating
-#         self.price = price
-#         self.publisher = publisher
-#         self.author = author
-#         self.year_published = year_published
-#tested
 @classmethod
 def update_discount_book(cls, publisher,discount_percent):
     with app.app_context():
