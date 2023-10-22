@@ -92,10 +92,19 @@ class Browsing_and_Sorting:
         with app.app_context():
                         
             books_to_update = cls.query.filter_by(publisher=publisher).all()
+        with app.app_context():
+                        
+            books_to_update = cls.query.filter_by(publisher=publisher).all()
 
             if not books_to_update:
                 return None
+            if not books_to_update:
+                return None
 
+            # Update each book's price
+            for book in books_to_update:
+                new_price = book.price - (book.price * discount_percent / 100)
+                book.price = new_price
             # Update each book's price
             for book in books_to_update:
                 new_price = book.price - (book.price * discount_percent / 100)
