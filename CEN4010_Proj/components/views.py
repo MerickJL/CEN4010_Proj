@@ -53,7 +53,6 @@ def addBook():
     # Return new_book as json
     return new_book.product_schema.jsonify(new_book)
 
-
 @app.route("/admin/books", methods=["GET"])
 def getBooks():
     """Returns a json with all the books in the database"""
@@ -142,7 +141,6 @@ def discount_books_by_publisher():
 #     results = Book.products_schema.dump(books)
 #     return jsonify(results)
 
-
 # @app.route("/books/topSellers", methods=["GET"])
 # def getBooksByTopSellers():
 #     """Handles getting books by top sellers from the database"""
@@ -154,7 +152,6 @@ def discount_books_by_publisher():
 #     results = Book.products_schema.dump(books)
 #     return jsonify(results)
 
-
 # @app.route("/books/rating/<RATING>", methods=["GET"])
 # def getBooksByRating(RATING):
 #     """Handles getting books by a rating or higher from the database"""
@@ -165,7 +162,6 @@ def discount_books_by_publisher():
 #     # Return books by a specific rating or higher as json
 #     results = Book.products_schema.dump(books)
 #     return jsonify(results)
-
 
 # @app.route("/books/limit/<LIMIT>", methods=["GET"])
 # def getBooksByLimit(LIMIT):
@@ -311,7 +307,6 @@ def viewCards(userName):
 # ******************** [2] Profile Management ********************
 
 # ******************** [3] Wishlist ************************
-
 @app.route("/wishList", methods=["POST"])
 def create_wishlist():
     # Fetch the POST request's fields
@@ -429,17 +424,9 @@ def getListFromShoppingCart(userName):
 
     return ShoppingCart.product_schema.jsonify(shopping_cart)
 
-
 # *********************[4] Shopping Cart *******************
 
 # *********************[5] Rating and comments *******************
-
-@app.route('/books', methods=['GET'])
-def get_all_books():
-    books = Book.query.all()
-    book_data = [{'id': book.id, 'title': book.title, 'author': book.author} for book in books]
-    return jsonify(book_data)
-
 @app.route('/book/<int:book_id>', methods=['GET'])
 def get_book(book_id):
     book = Book.query.get_or_404(book_id)
@@ -500,6 +487,5 @@ def comment_book(book_id):
         return jsonify({'message': 'Comment submitted successfully!'}), 201
     else:
         return jsonify({'error': 'Please enter a comment.'}), 400
-
 
 # *********************[5] Rating and comments *******************
