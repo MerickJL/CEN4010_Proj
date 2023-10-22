@@ -5,8 +5,7 @@ from flask import request, make_response
 from sqlalchemy import exists, func
 from components.Browsing_and_sorting import Book
 from components.Wishlist import Wishlist
-from components.Profile import Profile
-from components.Profile import CreditCards
+from components.Profile import Profile, CreditCards
 from components.ShoppingCart import ShoppingCart
 # from components.ShoppingCart import BookShopping
 from components.Rate import Rating, Comment
