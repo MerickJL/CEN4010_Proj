@@ -13,7 +13,7 @@ from __main__ import db, app
 
 # ******************** [1] Book Details ********************
 @app.route("/admin/books", methods=["POST"])
-def add_Book():
+def addBook():
     """Handles adding a book to the database"""
     # Fetch the POST request's fields
     ISBN = request.json["ISBN"]
@@ -46,7 +46,7 @@ def add_Book():
     return new_book.product_schema.jsonify(new_book)
 
 @app.route("/admin/books", methods=["GET"])
-def display_all_books():
+def displaybooks():
     # Query
     all_books = Book.query.all()
 
