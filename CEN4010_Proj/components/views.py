@@ -21,7 +21,7 @@ single file, make sure you are naming each function uniquely.
 
 # ******************** [1] Book Details ********************
 @app.route("/admin/books", methods=["POST"])
-def addBook():
+def add_Book():
     """Handles adding a book to the database"""
     # Fetch the POST request's fields
     ISBN = request.json["ISBN"]
@@ -54,8 +54,7 @@ def addBook():
     return new_book.product_schema.jsonify(new_book)
 
 @app.route("/admin/books", methods=["GET"])
-def getBooks():
-    """Returns a json with all the books in the database"""
+def display_all_books():
     # Query
     all_books = Book.query.all()
 
