@@ -47,28 +47,4 @@ class Book(db.Model):
         self.Publisher = Pub
         self.YearPublished = Year
         self.Sold = Sold
-        self.Rating = Rating
-
-    #     @classmethod
-    #     def add_book(cls, isbn, name,description, genre, copies_sold, book_rating, price,publisher,author,year_published):
-    #         with app.app_context():
-    #             db.create_all()
-    #             existing_book = cls.query.filter_by(isbn=isbn).first()
-    #             if existing_book is None:
-    #                 new_book = cls(isbn=isbn, name=name,description=description, genre=genre, copies_sold=copies_sold, book_rating=book_rating, price=price,publisher=publisher,author=author,year_published=year_published)
-    #                 db.session.add(new_book)
-    #                 db.session.commit()
-    #                 return new_book
-    #             else:
-    #                 return None  
-
-        # @classmethod
-        # def display_all_books(cls):
-        #     with app.app_context():
-        #         book_entries = cls.query.all()
-
-        #         if book_entries:
-        #          return books_schema.dumps(book_entries)
-        #         else:
-        #             return None
-            
+        self.Rating = Rating 
