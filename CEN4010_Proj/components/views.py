@@ -2,6 +2,7 @@ import datetime
 import re
 from flask import Flask, request, jsonify, make_response
 from sqlalchemy import exists, func
+from components.Browsing_and_sorting import Book
 from components.BookDetails import Book
 from components.Browsing_and_sorting import Browsing_and_Sorting
 from components.Wishlist import Wishlist
@@ -9,6 +10,13 @@ from components.Profile import Profile, CreditCards
 from components.ShoppingCart import ShoppingCart, BookShopping
 from components.Rate import Rating, Comment
 from __main__ import db, app
+
+"""
+This file will contain all the routes with their functions. Make sure to add a
+separator for your own section.
+It is easier to maintain and check for conflicts if all the routes are in a
+single file, make sure you are naming each function uniquely.
+"""
 
 # ******************** [1] Book Details ********************
 @app.route("/admin/books", methods=["POST"])
@@ -66,6 +74,19 @@ def getBookByISBN(ISBN):
         return jsonify(None)
 
     return Book.product_schema.jsonify(book)
+
+# Get all books 
+@app.route("/admin/books", methods=["GET"])
+def getBooks():
+
+    """Returns a json with all the books in the database"""
+    
+    books = Book.display_all_books()
+    if books:
+        return make_response(books, 200)
+    else:
+        return jsonify({"message": "No books found"}), 404
+        
      
 @app.route("/books/genre/<GENRE>", methods=["GET"])
 def getBooksByGenre(GENRE):
@@ -85,6 +106,7 @@ def getBooksByTopSellers():
         return make_response(books, 200)
     else:
         return jsonify({"message": "No books found"}), 404
+    
 
 @app.route("/books/rating/<RATING>", methods=["GET"])
 def getBooksByRating(RATING):
@@ -162,6 +184,7 @@ def discount_books_by_publisher():
 #Book.add_book(isbn=3890, name='Death of Piano Man', genre='Fantasy', copies_sold=1078, book_rating=3, price=31.99,publisher="McGriffin",author="Henry",year_published=1998,description="a fiction book")
 #Book.add_book(isbn=4789, name='Candy Dog', genre='Mystery', copies_sold=1178, book_rating=3, price=15.99,publisher="McGriffin",author="Thomas",year_published=1987,description="a solemn book")
 
+# ******************** [1] Book Details ********************
 # ******************** [2] Book Sorting ********************
 
 # ******************** [3] Profile Management ********************
@@ -285,6 +308,63 @@ def viewCards(userName):
     # Returns all the DB items as json
     return jsonify(result)
 
+# ******************** [2] Profile Management ********************
+
+
+# ******************** [3] Book Browsing & Sorting *******************
+@app.route("/books/genre/<GENRE>", methods=["GET"])
+def getBooksByGenre(GENRE):
+    """Handles getting books by genre from the database"""
+
+    # Get books by genre from db
+    books = Book.query.filter(Book.Genre == GENRE)
+
+    # Return books by genre as json
+    results = Book.products_schema.dump(books)
+    return jsonify(results)
+
+
+@app.route("/books/topSellers", methods=["GET"])
+def getBooksByTopSellers():
+    """Handles getting books by top sellers from the database"""
+
+    # Get books by top sellers from db
+    books = Book.query.order_by(Book.Sold.desc()).limit(10)
+
+    # Return books by top sellers as json
+    results = Book.products_schema.dump(books)
+    return jsonify(results)
+
+
+@app.route("/books/rating/<RATING>", methods=["GET"])
+def getBooksByRating(RATING):
+    """Handles getting books by a rating or higher from the database"""
+
+    # Get books by a specific rating or higher from db
+    books = Book.query.filter(Book.Rating >= RATING)
+
+    # Return books by a specific rating or higher as json
+    results = Book.products_schema.dump(books)
+    return jsonify(results)
+
+
+@app.route("/books/limit/<LIMIT>", methods=["GET"])
+def getBooksByLimit(LIMIT):
+    """Returns a json with X books where X is an int in the database"""
+
+    # Query
+    all_books = Book.query.order_by(Book.Name.asc()).limit(LIMIT)
+
+    result = Book.products_schema.dump(all_books)
+
+    # Returns X books in the DB as json
+    return jsonify(result)
+
+
+# ******************** [3] Book Browsing & Sorting *******************
+
+# ******************** [4] Wishlist ************************
+
 # ******************** [3] Profile Management ********************
 
 # ******************** [4] Wishlist ************************
@@ -325,6 +405,11 @@ def get_books_in_wishlist(title):
 
 @app.route("/wishList/<title>/books/<ISBN>", methods=["DELETE"])
 def remove_book_from_wishlist(title, ISBN):
+    Wishlist = Wishlist.query.filter_by(title=title).first()
+    if not Wishlist:
+        return jsonify(f"Wishlist {title} not found"), 404
+
+    message = Wishlist.remove_book(ISBN)
     wishlist = Wishlist.query.filter_by(title=title).first()
     if not wishlist:
         return jsonify(f"Wishlist {title} not found"), 404
@@ -342,80 +427,80 @@ def createShoppingCart():
     """Handles adding a shopping cart to the database"""
     User = request.json["User"]
 
-    # Create new book with fetched fields
-    shopping_cart = ShoppingCart(User)
+    # Check if the shopping cart for the user already exists
+    existing_cart = ShoppingCart.query.filter_by(User=User).first()
+    if existing_cart:
+        return jsonify("Shopping cart for this user already exists."), 400
 
-    # Only add book if it's unique
+    # Create new shopping cart with fetched fields
+    shopping_cart = ShoppingCart(User)
     db.session.add(shopping_cart)
     db.session.commit()
 
-    # Return new_book as json
-    return shopping_cart.product_schema.jsonify(shopping_cart)
+    return shopping_cart.product_schema.jsonify(shopping_cart), 201
 
 @app.route("/admin/getShoppingCart", methods=["GET"])
-def getShoppingCart():
-    """Returns a json with all the profile in the database"""
-    # Query
+def getAllShoppingCarts():
+    # Returns a json with all the shopping carts in the database
     all_ShoppingCart = ShoppingCart.query.all()
-
     result = ShoppingCart.products_schema.dump(all_ShoppingCart)
-
-    # Returns all the DB items as json
     return jsonify(result)
 
-@app.route("/admin/ShoppingCart/<userName>/<ISBN>", methods=["PUT"])
+@app.route("/admin/ShoppingCart/<userName>/books/<ISBN>", methods=["PUT"])
 def addBooksToShoppingCart(userName, ISBN):
-    # Attempt to find the user's shopping cart based on userName
+    shopping_cart = ShoppingCart.query.filter_by(User=userName).first()
+    if not shopping_cart:
+        return jsonify(f"Shopping cart for user {userName} not found"), 404
 
-    someOwner = ShoppingCart.query.filter_by(User=userName).first()
+    book = Book.query.get(ISBN)
+    if not book:
+        return jsonify(f"Book with ISBN {ISBN} not found"), 404
 
-    exist = db.session.query(exists().where(Book.ISBN == ISBN)).scalar()
+    if book in shopping_cart.books:
+        return jsonify(f"Book with ISBN {ISBN} is already in the shopping cart"), 400
 
-    if exist:
-        aBook = Book.query.filter_by(ISBN=ISBN).first()
-    else:
-        return jsonify("ERROR: Book does not exist")
-
-    temp = BookShopping(aBook)
-    temp.ownerId = someOwner.id
-    temp.bookId = aBook.id
-
-    db.session.add(temp)
+    shopping_cart.books.append(book)
     db.session.commit()
 
-    return temp.product_schema.jsonify(temp)
+    return jsonify(f"Book with ISBN {ISBN} added to shopping cart"), 200
 
-@app.route("/admin/ShoppingCart/<id>/<ISBN>", methods=["DELETE"])
-def deleteBookFromShoppingCart(id, ISBN):
-    result = " "
+@app.route("/admin/ShoppingCart/<userName>/books/<ISBN>", methods=["DELETE"])
+def removeBookFromShoppingCart(userName, ISBN):
+    shopping_cart = ShoppingCart.query.filter_by(User=userName).first()
+    if not shopping_cart:
+        return jsonify(f"Shopping cart for user {userName} not found"), 404
 
-    entry_to_delete = db.session.query(BookShopping).filter_by(ownerId=id, bookId=ISBN).first()
-    if entry_to_delete:
-        result = {
-            "id": entry_to_delete.id,
-            "ownerId": entry_to_delete.ownerId,
-            "bookId": entry_to_delete.bookId,
-            # Add other attributes as needed
-        }
-        db.session.delete(entry_to_delete)
-        db.session.commit()
-    else:
-        return jsonify("ERROR: Book does not exist")
+    book = Book.query.get(ISBN)
+    if not book:
+        return jsonify(f"Book with ISBN {ISBN} not found"), 404
 
-    # Returns all the DB items as json
-    return jsonify(result)
+    if book not in shopping_cart.books:
+        return jsonify(f"Book with ISBN {ISBN} is not in the shopping cart"), 400
 
-@app.route("/admin/ShoppingCart/<id>", methods=["GET"])
-def getListFromShoppingCart(id):
-    # Query the database to retrieve entries with ownerId equal to 5
-    all_profile = BookShopping.query.filter(BookShopping.ownerId == id).all()
+    shopping_cart.books.remove(book)
+    db.session.commit()
 
-    result = BookShopping.products_schema.dump(all_profile)
+    return jsonify(f"Book with ISBN {ISBN} removed from shopping cart"), 200
 
-    # Returns all the DB items as json
-    return jsonify(result)
+@app.route("/admin/ShoppingCart/<userName>", methods=["GET"])
+def getListFromShoppingCart(userName):
+    shopping_cart = ShoppingCart.query.filter_by(User=userName).first()
+    if not shopping_cart:
+        return jsonify(f"Shopping cart for user {userName} not found"), 404
+
+    return ShoppingCart.product_schema.jsonify(shopping_cart)
 
 # *********************[5] Shopping Cart *******************
+
+# *********************[5] Shopping Cart *******************
+
+# *********************[6] Rating and comments *******************
+
+@app.route('/books', methods=['GET'])
+def get_all_books():
+    books = Book.query.all()
+    book_data = [{'id': book.id, 'title': book.title, 'author': book.author} for book in books]
+    return jsonify(book_data)
 
 # *********************[6] Rating and comments *******************
 @app.route('/book/<int:book_id>', methods=['GET'])
@@ -478,5 +563,6 @@ def comment_book(book_id):
         return jsonify({'message': 'Comment submitted successfully!'}), 201
     else:
         return jsonify({'error': 'Please enter a comment.'}), 400
+
 
 # *********************[6] Rating and comments *******************

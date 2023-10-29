@@ -1,6 +1,6 @@
 # Base imports
 import os
-from flask import Flask, request, jsonify
+from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 # Flask app
@@ -23,6 +23,8 @@ ma = Marshmallow(app)
 We are going to keep classes in separate files. This way it will be easier to
 maintain and integrate new features. Please be sure to name classes uniquely.
 """
+#import components.views  # noqa:402
+import components.controller_browsing_and_sorting_sachin # noqa:402
 import components.views  # noqa:402
 
 if __name__ == "__main__":
