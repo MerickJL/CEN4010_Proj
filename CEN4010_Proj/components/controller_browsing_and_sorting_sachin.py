@@ -1,6 +1,5 @@
 from flask import request, make_response
 from __main__ import  app
-
 from components.model_browsing_and_sorting_sachin import Book
 
 """
@@ -9,8 +8,6 @@ separator for your own section.
 It is easier to maintain and check for conflicts if all the routes are in a
 single file, make sure you are naming each function uniquely.
 """
-
-
 
 # Get all books 
 @app.route("/admin/books", methods=["GET"])
@@ -24,9 +21,7 @@ def getBooks():
     else:
         return make_response({"message": f"No books found"}, 404)
 
-
 # ******************** [1] Book Browsing & Sorting (Sachin's API call) *******************
-
 
 @app.route("/books/genre/<GENRE>", methods=["GET"])
 def getBooksByGenre(GENRE):
@@ -55,7 +50,6 @@ def getBooksByRating(RATING):
         return make_response(books, 200)
     else:
         return make_response({"message": f"No books found for the rating {RATING}"}, 404)
-
 
 # Update discount prices by publisher
 @app.route('/books/discount_by_publisher', methods=['PATCH'])
