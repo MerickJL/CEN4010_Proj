@@ -11,14 +11,12 @@ from components.ShoppingCart import BookShopping
 from components.Rate import Rate
 from __main__ import db, app
 
-
 """
 This file will contain all the routes with their functions. Make sure to add a
 separator for your own section.
 It is easier to maintain and check for conflicts if all the routes are in a
 single file, make sure you are naming each function uniquely.
 """
-
 
 # ******************** [1] Book Details ********************
 @app.route("/admin/books", methods=["POST"])
