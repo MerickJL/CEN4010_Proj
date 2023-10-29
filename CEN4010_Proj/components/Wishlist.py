@@ -6,7 +6,6 @@ wishlist_books_association = db.Table('wishlist_books',
     db.Column('wishlist_id', db.Integer, db.ForeignKey('wishlist.id')),
     db.Column('book_id', db.Integer, db.ForeignKey('book.id'))
 )
-
 class Wishlist(db.Model):
     # Schema
     class ProductSchema(ma.Schema):

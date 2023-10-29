@@ -9,7 +9,6 @@ from __main__ import db, ma, app
 #     author = db.Column(db.String(100), nullable=False)
 #     ratings = db.relationship('Rating', backref='book', lazy=True)
 #     comments = db.relationship('Comment', backref='book', lazy=True)
-
 class Rating(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     value = db.Column(db.Integer, nullable=False)

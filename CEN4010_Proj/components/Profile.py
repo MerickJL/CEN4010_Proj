@@ -1,7 +1,6 @@
 #Mark Kneller
 from __main__ import db, ma, app
 
-
 class Profile(db.Model):
     """This class represents a book author"""
 
