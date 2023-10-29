@@ -10,7 +10,6 @@ class ShoppingCart(db.Model):
                 "id",
                 "User",
             )
-
     # Create DB fields
     id = db.Column(db.Integer, primary_key=True)
     User = db.Column(db.String(300), unique=True)
