@@ -56,12 +56,12 @@ def removeBookISBN(ISBN):
     book = Book.query.filter_by(ISBN=ISBN).first()
 
     if not book:
-        return jsonify({"message": f"Book with ISBN {ISBN} not found"}), 404
+        return jsonify(f"Book with ISBN {ISBN} not found"), 404
     
     db.session.delete(book)
     db.session.commit()
 
-    return jsonify({"message": f"Book with ISBN {ISBN} has been deleted successfully"}), 200
+    return jsonify(f"Book with ISBN {ISBN} has been deleted successfully"), 200
 
 @app.route("/admin/books", methods=["GET"])
 def displaybooks():
