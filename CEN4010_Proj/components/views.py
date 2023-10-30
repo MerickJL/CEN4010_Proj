@@ -329,68 +329,79 @@ def createShoppingCart():
     """Handles adding a shopping cart to the database"""
     User = request.json["User"]
 
-    # Check if the shopping cart for the user already exists
-    existing_cart = ShoppingCart.query.filter_by(User=User).first()
-    if existing_cart:
-        return jsonify("Shopping cart for this user already exists."), 400
-
-    # Create new shopping cart with fetched fields
+    # Create new book with fetched fields
     shopping_cart = ShoppingCart(User)
+
+    # Only add book if it's unique
     db.session.add(shopping_cart)
     db.session.commit()
 
-    return shopping_cart.product_schema.jsonify(shopping_cart), 201
+    # Return new_book as json
+    return shopping_cart.product_schema.jsonify(shopping_cart)
 
 @app.route("/admin/getShoppingCart", methods=["GET"])
-def getAllShoppingCarts():
-    # Returns a json with all the shopping carts in the database
+def getShoppingCart():
+    """Returns a json with all the profile in the database"""
+    # Query
     all_ShoppingCart = ShoppingCart.query.all()
+
     result = ShoppingCart.products_schema.dump(all_ShoppingCart)
+
+    # Returns all the DB items as json
     return jsonify(result)
 
-@app.route("/admin/ShoppingCart/<userName>/books/<ISBN>", methods=["PUT"])
+@app.route("/admin/ShoppingCart/<userName>/<ISBN>", methods=["PUT"])
 def addBooksToShoppingCart(userName, ISBN):
-    shopping_cart = ShoppingCart.query.filter_by(User=userName).first()
-    if not shopping_cart:
-        return jsonify(f"Shopping cart for user {userName} not found"), 404
+    # Attempt to find the user's shopping cart based on userName
 
-    book = Book.query.get(ISBN)
-    if not book:
-        return jsonify(f"Book with ISBN {ISBN} not found"), 404
+    someOwner = ShoppingCart.query.filter_by(User=userName).first()
 
-    if book in shopping_cart.books:
-        return jsonify(f"Book with ISBN {ISBN} is already in the shopping cart"), 400
+    exist = db.session.query(exists().where(Book.ISBN == ISBN)).scalar()
 
-    shopping_cart.books.append(book)
+    if exist:
+        aBook = Book.query.filter_by(ISBN=ISBN).first()
+    else:
+        return jsonify("ERROR: Book does not exist")
+
+    temp = BookShopping(aBook)
+    temp.ownerId = someOwner.id
+    temp.bookId = aBook.id
+
+    db.session.add(temp)
     db.session.commit()
 
-    return jsonify(f"Book with ISBN {ISBN} added to shopping cart"), 200
+    return temp.product_schema.jsonify(temp)
 
-@app.route("/admin/ShoppingCart/<userName>/books/<ISBN>", methods=["DELETE"])
-def removeBookFromShoppingCart(userName, ISBN):
-    shopping_cart = ShoppingCart.query.filter_by(User=userName).first()
-    if not shopping_cart:
-        return jsonify(f"Shopping cart for user {userName} not found"), 404
+@app.route("/admin/ShoppingCart/<id>/<ISBN>", methods=["DELETE"])
+def deleteBookFromShoppingCart(id, ISBN):
+    result = " "
 
-    book = Book.query.get(ISBN)
-    if not book:
-        return jsonify(f"Book with ISBN {ISBN} not found"), 404
+    entry_to_delete = db.session.query(BookShopping).filter_by(ownerId=id, bookId=ISBN).first()
+    if entry_to_delete:
+        result = {
+            "id": entry_to_delete.id,
+            "ownerId": entry_to_delete.ownerId,
+            "bookId": entry_to_delete.bookId,
+            # Add other attributes as needed
+        }
+        db.session.delete(entry_to_delete)
+        db.session.commit()
+    else:
+        return jsonify("ERROR: Book does not exist")
 
-    if book not in shopping_cart.books:
-        return jsonify(f"Book with ISBN {ISBN} is not in the shopping cart"), 400
+    # Returns all the DB items as json
+    return jsonify(result)
 
-    shopping_cart.books.remove(book)
-    db.session.commit()
+@app.route("/admin/ShoppingCart/<id>", methods=["GET"])
+def getListFromShoppingCart(id):
+    # Query the database to retrieve entries with ownerId equal to 5
+    all_profile = BookShopping.query.filter(BookShopping.ownerId == id).all()
 
-    return jsonify(f"Book with ISBN {ISBN} removed from shopping cart"), 200
+    result = BookShopping.products_schema.dump(all_profile)
 
-@app.route("/admin/ShoppingCart/<userName>", methods=["GET"])
-def getListFromShoppingCart(userName):
-    shopping_cart = ShoppingCart.query.filter_by(User=userName).first()
-    if not shopping_cart:
-        return jsonify(f"Shopping cart for user {userName} not found"), 404
+    # Returns all the DB items as json
+    return jsonify(result)
 
-    return ShoppingCart.product_schema.jsonify(shopping_cart)
 
 # *********************[5] Shopping Cart *******************
 
