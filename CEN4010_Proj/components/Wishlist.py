@@ -9,6 +9,7 @@ wishlist_books_association = db.Table('wishlist_books',
 class Wishlist(db.Model):
     # Schema
     class ProductSchema(ma.Schema):
+        books = ma.Nested(Book.ProductSchema, many=True)
         class Meta:
             fields = ("id", "title", "books")
 
