@@ -26,7 +26,7 @@ class Wishlist(db.Model):
             self.books = books
 
     def add_book(self, ISBN):
-        book = Book.query.get(int(ISBN))
+        book = Book.query.filter_by(ISBN=ISBN).first()
         if not book:
             return f"Book with ISBN {ISBN} not found"
         if book not in self.books:
@@ -35,11 +35,10 @@ class Wishlist(db.Model):
         return f"Book {book.Name} is already in the wishlist"
 
     def remove_book(self, ISBN):
-        book = Book.query.get(int(ISBN))
-        bookName = Book.query.get(int(ISBN)).Name
+        book = Book.query.filter_by(ISBN=ISBN).first()
         if not book:
             return f"Book with ISBN {ISBN} not found"
         if book in self.books:
             self.books.remove(book)
-            return f"Book {bookName} has been removed from wishlist"
-        return f"Book {bookName} is not in the wishlist"
+            return f"Book {book.Name} has been removed from wishlist"
+        return f"Book {book.Name} is not in the wishlist"
