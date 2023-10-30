@@ -286,7 +286,7 @@ def create_wishlist():
 
     return new_wishlist.product_schema.jsonify(new_wishlist), 201
 
-@app.route("/wishList/<title>/books/<ISBN>", methods=["PUT"])
+@app.route("/wishList/<title>/books/<int:ISBN>", methods=["PUT"])
 def add_book_to_wishlist(title, ISBN):
     wishlist = Wishlist.query.filter_by(title=title).first()
     if not wishlist:
@@ -305,7 +305,7 @@ def get_books_in_wishlist(title):
 
     return Wishlist.product_schema.jsonify(wishlist)
 
-@app.route("/wishList/<title>/books/<ISBN>", methods=["DELETE"])
+@app.route("/wishList/<title>/books/<int:ISBN>", methods=["DELETE"])
 def remove_book_from_wishlist(title, ISBN):
     Wishlist = Wishlist.query.filter_by(title=title).first()
     if not Wishlist:
