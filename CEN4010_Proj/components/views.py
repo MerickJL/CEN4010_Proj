@@ -286,7 +286,7 @@ def create_wishlist():
 
     return new_wishlist.product_schema.jsonify(new_wishlist), 201
 
-@app.route("/wishList/<title>/books/<ISBN>", methods=["PUT"])
+@app.route("/wishList/<title>/books/<int:ISBN>", methods=["PUT"])
 def add_book_to_wishlist(title, ISBN):
     wishlist = Wishlist.query.filter_by(title=title).first()
     if not wishlist:
@@ -305,7 +305,7 @@ def get_books_in_wishlist(title):
 
     return Wishlist.product_schema.jsonify(wishlist)
 
-@app.route("/wishList/<title>/books/<ISBN>", methods=["DELETE"])
+@app.route("/wishList/<title>/books/<int:ISBN>", methods=["DELETE"])
 def remove_book_from_wishlist(title, ISBN):
     Wishlist = Wishlist.query.filter_by(title=title).first()
     if not Wishlist:
@@ -348,7 +348,7 @@ def getAllShoppingCarts():
     result = ShoppingCart.products_schema.dump(all_ShoppingCart)
     return jsonify(result)
 
-@app.route("/admin/ShoppingCart/<userName>/books/<ISBN>", methods=["PUT"])
+@app.route("/admin/ShoppingCart/<userName>/books/<int:ISBN>", methods=["PUT"])
 def addBooksToShoppingCart(userName, ISBN):
     shopping_cart = ShoppingCart.query.filter_by(User=userName).first()
     if not shopping_cart:
@@ -366,7 +366,7 @@ def addBooksToShoppingCart(userName, ISBN):
 
     return jsonify(f"Book with ISBN {ISBN} added to shopping cart"), 200
 
-@app.route("/admin/ShoppingCart/<userName>/books/<ISBN>", methods=["DELETE"])
+@app.route("/admin/ShoppingCart/<userName>/books/<int:ISBN>", methods=["DELETE"])
 def removeBookFromShoppingCart(userName, ISBN):
     shopping_cart = ShoppingCart.query.filter_by(User=userName).first()
     if not shopping_cart:
