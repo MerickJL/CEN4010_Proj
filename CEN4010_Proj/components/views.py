@@ -190,6 +190,17 @@ def viewCards(userName):
 
 # ******************** [3] Book Browsing & Sorting *******************
 
+@app.route("/books/<ISBN>", methods=["GET"])
+def getBookByISBN(ISBN):
+    """Returns the book requested by the specific ISBN route"""
+    book = Book.query.get(ISBN)
+
+    if book is None:
+        return jsonify(None)
+
+    return Book.product_schema.jsonify(book)
+
+
 @app.route("/books/genre/<GENRE>", methods=["GET"])
 def getBooksByGenre(GENRE):
     """Handles getting books by genre from the database"""
