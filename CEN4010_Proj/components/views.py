@@ -2,9 +2,8 @@ import datetime
 import re
 from flask import Flask, request, jsonify, make_response
 from sqlalchemy import exists, func
-from components.Browsing_and_sorting import Book
 from components.BookDetails import Book
-from components.Browsing_and_sorting import Browsing_and_Sorting
+from components.model_browsing_and_sorting_sachin import Book2
 from components.Wishlist import Wishlist
 from components.Profile import Profile, CreditCards
 from components.ShoppingCart import ShoppingCart, BookShopping
@@ -92,7 +91,7 @@ def getBooks():
 def getBooksByGenre(GENRE):
     """Handles getting books by genre from the database"""
 
-    books = Browsing_and_Sorting.search_books_by_genre_JSON(GENRE)
+    books = Book2.search_books_by_genre_JSON(GENRE)
     if books:
         return make_response(books, 200)
     else:
@@ -101,7 +100,7 @@ def getBooksByGenre(GENRE):
 @app.route("/books/topSellers", methods=["GET"])
 def getBooksByTopSellers():
     """Handles getting books by top sellers from the database"""
-    books = Browsing_and_Sorting.search_top_ten_book_count_JSON()
+    books = Book2.search_top_ten_book_count_JSON()
     if books:
         return make_response(books, 200)
     else:
@@ -111,7 +110,7 @@ def getBooksByTopSellers():
 @app.route("/books/rating/<RATING>", methods=["GET"])
 def getBooksByRating(RATING):
     """Handles getting books by a rating or higher from the database"""
-    books = Browsing_and_Sorting.search_books_by_book_rating_JSON(RATING)
+    books = Book2.search_books_by_book_rating_JSON(RATING)
     if books:
         return make_response(books, 200)
     else:
@@ -126,7 +125,7 @@ def discount_books_by_publisher():
     if not discount_percent or not publisher:
         return jsonify({"message": "Missing parameters"}), 400
 
-    affected_rows = Browsing_and_Sorting.update_discount_price_by_publisher(publisher,discount_percent)
+    affected_rows = Book2.update_discount_price_by_publisher(publisher,discount_percent)
 
     if affected_rows:
         return jsonify({"message": f"Discount applied to {affected_rows} books from {publisher}."}), 200

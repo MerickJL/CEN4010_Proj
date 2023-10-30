@@ -1,6 +1,6 @@
 from flask import request, make_response
 from __main__ import  app
-from components.model_browsing_and_sorting_sachin import Book
+from components.model_browsing_and_sorting_sachin import Book2
 
 """
 This file will contain all the routes with their functions. Make sure to add a
@@ -15,7 +15,7 @@ def getBooks():
 
     """Returns a json with all the books in the database"""
     
-    books = Book.display_all_books()
+    books = Book2.display_all_books()
     if books:
         return make_response(books, 200)
     else:
@@ -27,7 +27,7 @@ def getBooks():
 def getBooksByGenre(GENRE):
     """Handles getting books by genre from the database"""
 
-    books = Book.search_books_by_genre_JSON(GENRE)
+    books = Book2.search_books_by_genre_JSON(GENRE)
     if books:
         return make_response(books, 200)
     else:
@@ -36,7 +36,7 @@ def getBooksByGenre(GENRE):
 @app.route("/books/topSellers", methods=["GET"])
 def getBooksByTopSellers():
     """Handles getting books by top sellers from the database"""
-    books = Book.search_top_ten_book_count_JSON()
+    books = Book2.search_top_ten_book_count_JSON()
     if books:
         return make_response(books, 200)
     else:
@@ -45,7 +45,7 @@ def getBooksByTopSellers():
 @app.route("/books/rating/<RATING>", methods=["GET"])
 def getBooksByRating(RATING):
     """Handles getting books by a rating or higher from the database"""
-    books = Book.search_books_by_book_rating_JSON(RATING)
+    books = Book2.search_books_by_book_rating_JSON(RATING)
     if books:
         return make_response(books, 200)
     else:
@@ -59,7 +59,7 @@ def discount_books_by_publisher():
     
     if not discount_percent or not publisher:
         return make_response({"message": f"Missing parameters"}, 400)
-    affected_rows = Book.update_discount_price_by_publisher(publisher,discount_percent)
+    affected_rows = Book2.update_discount_price_by_publisher(publisher,discount_percent)
 
     if affected_rows:
         return make_response({"message": f"Discount applied to {affected_rows} books from {publisher}."}, 200)

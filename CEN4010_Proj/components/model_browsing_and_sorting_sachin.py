@@ -6,14 +6,13 @@ from __main__ import db, ma, app
 class BookSchema(ma.Schema):
     price = fields.Float()  
     class Meta:
-        
         fields = ("id","isbn", "name","description", "genre", "copies_sold", "book_rating", "price","publisher","author","year_published")
 
 # Initialize schema
 book_schema = BookSchema()
 books_schema = BookSchema(many=True)  # To handle multiple Book objects
 #db = SQLAlchemy(app)
-class Book(db.Model):
+class Book2(db.Model):
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     isbn = db.Column(db.Integer, unique=True, nullable=False)
     name = db.Column(db.String(120), unique=True, nullable=False)
@@ -42,8 +41,8 @@ class Book(db.Model):
     @classmethod
     def update_discount_book(cls, publisher,discount_percent):
         with app.app_context():
-             affected_rows = Book.query.filter_by(publisher=publisher).update({
-                'price': Book.price - (Book.price * discount_percent / 100)
+             affected_rows = Book2.query.filter_by(publisher=publisher).update({
+                'price': Book2.price - (Book2.price * discount_percent / 100)
         })
         db.session.commit()
         if affected_rows:
