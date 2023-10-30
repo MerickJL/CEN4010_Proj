@@ -316,7 +316,7 @@ def remove_wishlist():
     if not existing_wishlist:
         return jsonify(f"Wishlist {title} not found."), 404
 
-    db.session.remove(existing_wishlist)
+    db.session.delete(existing_wishlist)
     db.session.commit()
 
     return jsonify(f"Wishlist {title} has been successfully deleted."), 200
