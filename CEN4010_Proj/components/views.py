@@ -325,7 +325,7 @@ def remove_wishlist():
 def add_book_to_wishlist(title, ISBN):
     wishlist = Wishlist.query.filter_by(title=title).first()
     if not wishlist:
-        return jsonify(f"Wishlist {title} not found"), 404
+        return jsonify(f"Wishlist '{title}' not found"), 404
 
     message, code = wishlist.add_book(ISBN)
     db.session.commit()
