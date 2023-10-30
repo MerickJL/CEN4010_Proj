@@ -267,9 +267,7 @@ def discount_books_by_publisher():
 
 # ******************** [3] Book Browsing & Sorting *******************
 
-# ******************** [4] Wishlist ************************
 
-# ******************** [3] Profile Management ********************
 
 # ******************** [4] Wishlist ************************
 @app.route("/wishList", methods=["POST"])
@@ -396,7 +394,7 @@ def getListFromShoppingCart(userName):
 
 # *********************[5] Shopping Cart *******************
 
-# *********************[5] Shopping Cart *******************
+
 
 # *********************[6] Rating and comments *******************
 
@@ -406,7 +404,6 @@ def get_all_books():
     book_data = [{'id': book.id, 'title': book.title, 'author': book.author} for book in books]
     return jsonify(book_data)
 
-# *********************[6] Rating and comments *******************
 @app.route('/book/<int:book_id>', methods=['GET'])
 def get_book(book_id):
     book = Book.query.get_or_404(book_id)
@@ -467,6 +464,5 @@ def comment_book(book_id):
         return jsonify({'message': 'Comment submitted successfully!'}), 201
     else:
         return jsonify({'error': 'Please enter a comment.'}), 400
-
 
 # *********************[6] Rating and comments *******************
