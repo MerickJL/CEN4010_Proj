@@ -37,11 +37,11 @@ class Wishlist(db.Model):
     def add_book(self, ISBN):
         message, book = self.check_for_book(ISBN)
         if message:
-            return message
+            return message, 404
         if book not in self.books:
             self.books.append(book)
-            return f"Book {book.Name} has been added to wishlist"
-        return f"Book {book.Name} is already in the wishlist"
+            return f"Book {book.Name} has been added to wishlist", 200
+        return f"Book {book.Name} is already in the wishlist", 400
 
     def remove_book(self, ISBN):
         message, book = self.check_for_book(ISBN)
@@ -49,5 +49,5 @@ class Wishlist(db.Model):
             return message
         if book in self.books:
             self.books.remove(book)
-            return f"Book {book.Name} has been removed from wishlist"
-        return f"Book {book.Name} is not in the wishlist"
+            return f"Book {book.Name} has been removed from wishlist", 200
+        return f"Book {book.Name} is not in the wishlist", 404

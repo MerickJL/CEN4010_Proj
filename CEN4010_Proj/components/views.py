@@ -292,10 +292,10 @@ def add_book_to_wishlist(title, ISBN):
     if not wishlist:
         return jsonify(f"Wishlist {title} not found"), 404
 
-    message = wishlist.add_book(ISBN)
+    message, code = wishlist.add_book(ISBN)
     db.session.commit()
 
-    return jsonify(message)
+    return jsonify(message), code
 
 @app.route("/wishList/<title>", methods=["GET"])
 def get_books_in_wishlist(title):
@@ -311,11 +311,11 @@ def remove_book_from_wishlist(title, ISBN):
     if not wishlist:
         return jsonify(f"Wishlist {title} not found"), 404
 
-    message = wishlist.remove_book(ISBN)
+    message, code = wishlist.remove_book(ISBN)
 
     db.session.commit()
 
-    return jsonify(message)
+    return jsonify(message), code
 
 # ******************** [4] Wishlist ************************
 
