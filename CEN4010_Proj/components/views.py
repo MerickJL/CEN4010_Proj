@@ -74,9 +74,7 @@ def getBookByISBN(ISBN):
 
     return Book.product_schema.jsonify(book)
 
-# Get all books 
-@app.route("/admin/books", methods=["GET"])
-def getBooks():
+
 
     """Returns a json with all the books in the database"""
     
@@ -85,8 +83,7 @@ def getBooks():
         return make_response(books, 200)
     else:
         return jsonify({"message": "No books found"}), 404
-        
-     
+           
 @app.route("/books/genre/<GENRE>", methods=["GET"])
 def getBooksByGenre(GENRE):
     """Handles getting books by genre from the database"""
