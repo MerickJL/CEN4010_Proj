@@ -46,7 +46,7 @@ class Wishlist(db.Model):
     def remove_book(self, ISBN):
         message, book = self.check_for_book(ISBN)
         if message:
-            return message
+            return message, 404
         if book in self.books:
             self.books.remove(book)
             return f"Book '{book.Name}' has been removed from wishlist", 200

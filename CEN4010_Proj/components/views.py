@@ -37,7 +37,7 @@ def addBook():
     duplicate = db.session.query(exists().where(Book.Name == Name)).scalar()
 
     if duplicate:
-        return jsonify("Book name is already in the database")
+        return jsonify("Book name is already in the database"), 400
 
     # Create new book with fetched fields
     new_book = Book(
@@ -282,6 +282,14 @@ def discount_books_by_publisher():
 
 
 # ******************** [4] Wishlist ************************
+@app.route("/wishList", methods=["GET"])
+def get_wishlists():
+    all_wishlists = Wishlist.query.all()  # Query all wishlists
+
+    result = Wishlist.products_schema.dump(all_wishlists)
+
+    return jsonify(result)
+
 @app.route("/wishList", methods=["POST"])
 def create_wishlist():
     # Fetch the POST request's fields
@@ -297,6 +305,21 @@ def create_wishlist():
     db.session.commit()
 
     return new_wishlist.product_schema.jsonify(new_wishlist), 201
+
+@app.route("/wishList", methods=["DELETE"])
+def remove_wishlist():
+    # Fetch the POST request's fields
+    title = request.json["title"]
+    
+    # Check if the wishlist title already exists
+    existing_wishlist = Wishlist.query.filter_by(title=title).first()
+    if not existing_wishlist:
+        return jsonify(f"Wishlist {title} not found."), 404
+
+    db.session.remove(existing_wishlist)
+    db.session.commit()
+
+    return jsonify(f"Wishlist {title} has been successfully deleted."), 200
 
 @app.route("/wishList/<title>/books/<int:ISBN>", methods=["PUT"])
 def add_book_to_wishlist(title, ISBN):
