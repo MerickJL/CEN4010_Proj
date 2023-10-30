@@ -26,7 +26,7 @@ class Wishlist(db.Model):
             self.books = books
 
     def add_book(self, ISBN):
-        book = Book.query.get(ISBN)
+        book = Book.query.get(int(ISBN))
         if not book:
             return f"Book with ISBN {ISBN} not found"
         if book not in self.books:
