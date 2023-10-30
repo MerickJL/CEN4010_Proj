@@ -283,12 +283,12 @@ def discount_books_by_publisher():
 
 # ******************** [4] Wishlist ************************
 @app.route("/wishList", methods=["GET"])
-def get_wishlists():
+def get_all_wishlists():
     all_wishlists = Wishlist.query.all()  # Query all wishlists
 
     result = Wishlist.products_schema.dump(all_wishlists)
 
-    return jsonify(result)
+    return jsonify(result), 200
 
 @app.route("/wishList", methods=["POST"])
 def create_wishlist():
@@ -298,7 +298,7 @@ def create_wishlist():
     # Check if the wishlist title already exists
     existing_wishlist = Wishlist.query.filter_by(title=title).first()
     if existing_wishlist:
-        return jsonify("Wishlist title already in use."), 400
+        return jsonify(f"Wishlist title '{title}' already in use."), 400
 
     new_wishlist = Wishlist(title)
     db.session.add(new_wishlist)
@@ -314,12 +314,12 @@ def remove_wishlist():
     # Check if the wishlist title already exists
     existing_wishlist = Wishlist.query.filter_by(title=title).first()
     if not existing_wishlist:
-        return jsonify(f"Wishlist {title} not found."), 404
+        return jsonify(f"Wishlist '{title}' not found."), 404
 
     db.session.delete(existing_wishlist)
     db.session.commit()
 
-    return jsonify(f"Wishlist {title} has been successfully deleted."), 200
+    return jsonify(f"Wishlist '{title}' has been successfully deleted."), 200
 
 @app.route("/wishList/<title>/books/<int:ISBN>", methods=["PUT"])
 def add_book_to_wishlist(title, ISBN):
@@ -336,7 +336,7 @@ def add_book_to_wishlist(title, ISBN):
 def get_books_in_wishlist(title):
     wishlist = Wishlist.query.filter_by(title=title).first()
     if not wishlist:
-        return jsonify(f"Wishlist {title} not found"), 404
+        return jsonify(f"Wishlist '{title}' not found"), 404
 
     return Wishlist.product_schema.jsonify(wishlist)
 
