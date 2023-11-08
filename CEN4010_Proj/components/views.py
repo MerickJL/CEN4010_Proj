@@ -205,8 +205,8 @@ def viewCards(userName):
 @app.route("/books/<ISBN>", methods=["GET"])
 def getBookByISBN(ISBN):
     """Returns the book requested by the specific ISBN route"""
-    book = Book.query.get(ISBN)
-
+    book = Book.query.filter(Book.ISBN == ISBN).first()
+    
     if book is None:
         return jsonify(None)
 
@@ -262,20 +262,28 @@ def getBooksByLimit(LIMIT):
     return jsonify(result)
 
 # Update discount prices by publisher
-@app.route('/discount_books', methods=['PUT', 'PATCH'])
+@app.route('/books/discount_books', methods=['PUT', 'PATCH'])
 def discount_books_by_publisher():
     discount_percent = request.json.get('discount_percent')
     publisher = request.json.get('publisher')
     
     if not discount_percent or not publisher:
         return jsonify({"message": "Missing parameters"}), 400
+         
+    #affected_rows = Book2.update_discount_price_by_publisher(publisher,discount_percent)
+    books_to_update = Book.query.filter_by(Publisher=publisher).all()
 
-    affected_rows = Book2.update_discount_price_by_publisher(publisher,discount_percent)
-
-    if affected_rows:
-        return jsonify({"message": f"Discount applied to {affected_rows} books from {publisher}."}), 200
-    else:
+    if not books_to_update:
         return jsonify({"message": f"No books found from publisher {publisher}"}), 404
+
+    # Update each book's price
+    for book in books_to_update:
+        new_price = book.Price - (book.Price * discount_percent / 100)
+        book.Price = new_price
+    db.session.commit()
+    affected_rows=len(books_to_update)
+    return jsonify({"message": f"Discount applied to {affected_rows} books from {publisher}."}), 200
+    
 
 # ******************** [3] Book Browsing & Sorting *******************
 
