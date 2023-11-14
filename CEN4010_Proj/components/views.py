@@ -493,6 +493,7 @@ def rate_book(book_id):
         db.session.add(rating)
         db.session.commit()
         return jsonify({'message': 'Rating submitted successfully!'}), 201
+    
     else:
         return jsonify({'error': 'Invalid rating value. Please choose a rating between 1 and 5.'}), 400
 
@@ -512,6 +513,7 @@ def comment_book(book_id):
         db.session.add(comment)
         db.session.commit()
         return jsonify({'message': 'Comment submitted successfully!'}), 201
+    
     else:
         return jsonify({'error': 'Please enter a comment.'}), 400
 
