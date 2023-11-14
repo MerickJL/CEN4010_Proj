@@ -20,7 +20,8 @@ class ShoppingCart(db.Model):
 
     def __init__(self, User):
         self.User = User
-
+        self.subtotal = 0
+        
     def addBookToShoppingCart(self, ISBN):
         self.Books = self.Books + ISBN
         return "Book " + Book.query.get(int(ISBN)).Name + " has been added"
