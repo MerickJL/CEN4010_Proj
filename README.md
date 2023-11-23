@@ -2,6 +2,9 @@
 
 This API will be used as part of the backend for a bookstore website.
 
+# Group 15's Repo Link
+https://github.com/MerickJL/CEN4010_Proj.git
+
 # Setup environment
 
 Make sure you have a Python version installed and added to your PATH
