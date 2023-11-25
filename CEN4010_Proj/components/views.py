@@ -471,6 +471,8 @@ def getAverageRating(ISBN):
     # Returns X books in the DB as json
     return jsonify({"rating": avg_rating_books[0]})
 
+
+def COMMENTED_OUT():
 # @app.route('/books', methods=['GET'])
 # def get_all_books():
 #     books = Book.query.all()
@@ -522,22 +524,25 @@ def getAverageRating(ISBN):
 
 # @app.route('/book/<int:book_id>/comment', methods=['POST'])
 # def comment_book(book_id):
-    book = Book.query.get_or_404(book_id)
-    data = request.get_json()
+#    book = Book.query.get_or_404(book_id)
+#    data = request.get_json()
 
-    if 'text' not in data or 'user_id' not in data:
-        return jsonify({'error': 'Invalid request. Please provide text and user_id.'}), 400
+#    if 'text' not in data or 'user_id' not in data:
+#        return jsonify({'error': 'Invalid request. Please provide text and user_id.'}), 400
 
-    comment_text = data['text']
-    user_id = int(data['user_id'])
+#    comment_text = data['text']
+#    user_id = int(data['user_id'])
 
-    if comment_text:
-        comment = Comment(text=comment_text, book=book, user_id=user_id)
-        db.session.add(comment)
-        db.session.commit()
-        return jsonify({'message': 'Comment submitted successfully!'}), 201
+#    if comment_text:
+#        comment = Comment(text=comment_text, book=book, user_id=user_id)
+#        db.session.add(comment)
+#        db.session.commit()
+#        return jsonify({'message': 'Comment submitted successfully!'}), 201
     
-    else:
-        return jsonify({'error': 'Please enter a comment.'}), 400
+#    else:
+#        return jsonify({'error': 'Please enter a comment.'}), 400
+
+    pass # !!!! <!-- added to remove compile time errors... --> !!!! #
 
 # *********************[6] Rating and comments *******************
+    
