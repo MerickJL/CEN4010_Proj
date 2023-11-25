@@ -110,16 +110,7 @@ def addUser():
     # Return new_user as json
     return new_user.product_schema.jsonify(new_user)
 
-@app.route("/profile/getUsers", methods=["GET"])
-def getUsers():
-    """Returns a json with all the profile in the database"""
-    # Query
-    all_profile = Profile.query.all()
 
-    result = Profile.products_schema.dump(all_profile)
-
-    # Returns all the DB items as json
-    return jsonify(result)
 
 @app.route("/profile/<userName>", methods=["GET"])
 def getUserByUsername(userName):
