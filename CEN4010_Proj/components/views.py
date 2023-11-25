@@ -60,6 +60,35 @@ def removeBookISBN(ISBN):
 
     return jsonify(f"Book with ISBN {ISBN} has been deleted successfully"), 200
 
+@app.route("/admin/books/<int:ISBN>", methods=["PATCH"])
+def editBook(ISBN):
+    # Fetch the book by ISBN
+    book = Book.query.filter_by(ISBN=ISBN).first()
+
+    # If the book doesn't exist, return an error
+    if not book:
+        return jsonify(f"Book with ISBN {ISBN} not found"), 404
+
+    # Fetch data from request
+    data = request.json
+
+    # Update the book details if provided in the request
+    book.Name = data.get('Name', book.Name)
+    book.Description = data.get('Description', book.Description)
+    book.Price = data.get('Price', book.Price)
+    book.Author = data.get('Author', book.Author)
+    book.Genre = data.get('Genre', book.Genre)
+    book.Publisher = data.get('Publisher', book.Publisher)
+    book.YearPublished = data.get('YearPublished', book.YearPublished)
+    book.Sold = data.get('Sold', book.Sold)
+    book.Rating = data.get('Rating', book.Rating)
+
+    # Commit the changes to the database
+    db.session.commit()
+
+    # Return the updated book as JSON
+    return book.product_schema.jsonify(book), 200
+
 @app.route("/admin/books", methods=["GET"])
 def displaybooks():
    
@@ -421,7 +450,7 @@ def createBookRating():
     return new_rating.product_schema.jsonify(new_rating)
 
 @app.route("/books/comments/<isbn>", methods=["GET"])
-def getBookCommonts(isbn):
+def getBookComments(isbn):
     """Returns a json with all books ordered by rating"""
 
     comments = Rate.query.filter_by(isbn=isbn).all()
