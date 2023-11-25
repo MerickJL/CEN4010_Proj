@@ -424,7 +424,6 @@ def deleteBookFromShoppingCart(id, ISBN):
             "id": entry_to_delete.id,
             "ownerId": entry_to_delete.ownerId,
             "bookId": entry_to_delete.bookId,
-            # Add other attributes as needed
         }
         db.session.delete(entry_to_delete)
         db.session.commit()
