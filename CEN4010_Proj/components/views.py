@@ -21,7 +21,7 @@ single file, make sure you are naming each function uniquely.
 @app.route("/admin/books", methods=["POST"])
 def addBook():
     """Handles adding a book to the database"""
-    # Fetch the POST request's fields
+
     ISBN = request.json["ISBN"]
     Name = request.json["Name"]
     Description = request.json["Description"]
@@ -33,22 +33,19 @@ def addBook():
     Sold = request.json["Sold"]
     Rating = request.json["Rating"]
 
-    # Check if the book exists in the DB
+    # Book DB check
     duplicate = db.session.query(exists().where(Book.Name == Name)).scalar()
 
     if duplicate:
         return jsonify("Book name is already in the database"), 400
 
     # Create new book with fetched fields
-    new_book = Book(
-        ISBN, Name, Description, Price, Author, Genre, Publisher, YearPublished, Sold, Rating
-    )  # noqa
+    new_book = Book(ISBN, Name, Description, Price, Author, Genre, Publisher, YearPublished, Sold, Rating)  
 
     # Only add book if it's unique
     db.session.add(new_book)
     db.session.commit()
 
-    # Return new_book as json
     return new_book.product_schema.jsonify(new_book)
 
 @app.route("/admin/books/<int:ISBN>", methods=["DELETE"])
@@ -65,12 +62,11 @@ def removeBookISBN(ISBN):
 
 @app.route("/admin/books", methods=["GET"])
 def displaybooks():
-    # Query
+   
     all_books = Book.query.all()
 
     result = Book.products_schema.dump(all_books)
 
-    # Returns all the DB items as json
     return jsonify(result)
 
 # ******************** [1] Book Details ********************
@@ -79,45 +75,34 @@ def displaybooks():
 # ******************** [2] Profile Management ********************
 @app.route("/profile/createUser", methods=["POST"])
 def addUser():
-    """Handles creating a user profile in the databse"""
-
-    # pattern used from username(email) input
+    # Pattern check for email
     regex = "^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$"
 
-    # Fetch the POST request's fields
     UserName = request.json["UserName"]
     Password = request.json["Password"]
     Name = request.json["Name"]
     HomeAddress = request.json["HomeAddress"]
 
-    # check if username is valid
+    # Username Check
     if (re.search(regex, UserName)) == None:
         return jsonify("Invalid username")
 
-    # Check if the username already exists in the DB
+    # Username Duplicate Check
     duplicate = db.session.query(exists().where(Profile.UserName == UserName)).scalar()
-
     if duplicate:
         return jsonify("Username already in use")
 
-    # Create new user with fetched fields
     new_user = Profile(UserName, Password, Name, HomeAddress)
 
-    # Only add user if it's unique
     db.session.add(new_user)
     db.session.commit()
 
-    # Return new_user as json
     return new_user.product_schema.jsonify(new_user)
-
-
 
 @app.route("/profile/<userName>", methods=["GET"])
 def getUserByUsername(userName):
-    """Returns the searched user requested using the username"""
+    
     user = Profile.query.filter_by(UserName=userName).first()
-
-    # check if user exists
     if user is None:
         return jsonify(None)
 
@@ -125,13 +110,11 @@ def getUserByUsername(userName):
 
 @app.route("/profile/<userName>", methods=["PUT"])
 def updateUser(userName):
+    
     user = Profile.query.filter_by(UserName=userName).first()
-
-    # check if user exists
     if user is None:
         return jsonify(None)
 
-    # Fetch the PUT request's fields
     Password = request.json["Password"]
     Name = request.json["Name"]
     HomeAddress = request.json["HomeAddress"]
@@ -142,38 +125,30 @@ def updateUser(userName):
 
     db.session.commit()
 
-    # Update user fields
     return user.product_schema.jsonify(user)
 
 @app.route("/profile/creditcards/<userName>", methods=["POST"])
 def addCards(userName):
-    someOwner = Profile.query.filter_by(UserName=userName).first()
+    someUser = Profile.query.filter_by(UserName=userName).first()
 
-    # check if user exists
-    if someOwner is None:
+    if someUser is None:
         return jsonify(None)
 
     cardNumber = request.json["cardNumber"]
     expirationDate = request.json["expirationDate"]
     cvs = request.json["cvs"]
 
-    duplicate = db.session.query(
-        exists().where(CreditCards.cardNumber == cardNumber)
-    ).scalar()
-
-    # check to see if card already in database
+    duplicate = db.session.query(exists().where(CreditCards.cardNumber == cardNumber)).scalar()
     if duplicate:
         return jsonify("card already in use")
 
     newCard = CreditCards(cardNumber, expirationDate, cvs)
-    newCard.ownerId = someOwner.id
+    newCard.ownerId = someUser.id
 
     db.session.add(newCard)
     db.session.commit()
 
     return newCard.product_schema.jsonify(newCard)
-
-
 
 # ******************** [2] Profile Management ********************
 
@@ -265,8 +240,6 @@ def discount_books_by_publisher():
 
 # ******************** [3] Book Browsing & Sorting *******************
 
-
-
 # ******************** [4] Wishlist ************************
 @app.route("/wishList", methods=["GET"])
 def get_all_wishlists():
@@ -339,6 +312,8 @@ def remove_book_from_wishlist(title, ISBN):
     return jsonify(message), code
 
 # ******************** [4] Wishlist ************************
+
+
 
 # *********************[5] Shopping Cart *******************
 @app.route("/admin/ShoppingCart", methods=["POST"])
