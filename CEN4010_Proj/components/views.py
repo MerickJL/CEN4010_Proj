@@ -145,7 +145,7 @@ def updateUser(userName):
     # Update user fields
     return user.product_schema.jsonify(user)
 
-@app.route("/profile/<userName>/creditcards", methods=["POST"])
+@app.route("/profile/creditcards/<userName>", methods=["POST"])
 def addCards(userName):
     someOwner = Profile.query.filter_by(UserName=userName).first()
 
