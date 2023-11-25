@@ -449,7 +449,7 @@ def createBookRating():
 
     return new_rating.product_schema.jsonify(new_rating)
 
-@app.route("/books/comments/<isbn>", methods=["GET"])
+@app.route("/books/comments/<int: isbn>", methods=["GET"])
 def getBookComments(isbn):
     """Returns a json with all books ordered by rating"""
 
@@ -461,6 +461,32 @@ def getBookComments(isbn):
     # Returns X books in the DB as json
     return jsonify(result)
 
+@app.route("/books/rate/<username>/<int:isbn>", methods=["PUT"])
+def updateBookRating(username, isbn):
+    """Update a user's rating and comment on a book"""
+
+    # Fetch the new rating and comment from the request
+    new_rating = request.json.get("rating")
+    new_comment = request.json.get("comment")
+
+    # Find the existing rating
+    existing_rating = Rate.query.filter_by(username=username, isbn=isbn).first()
+
+    # Check if the rating exists
+    if not existing_rating:
+        return jsonify(f"Rating by '{username}' for ISBN {isbn} not found"), 404
+
+    # Update the rating and comment
+    if new_rating is not None:
+        existing_rating.rating = new_rating
+    if new_comment is not None:
+        existing_rating.comment = new_comment
+
+    # Commit the changes to the database
+    db.session.commit()
+
+    return jsonify(f"Rating updated successfully"), 200
+
 @app.route("/books/ave/<ISBN>", methods=["GET"])
 def getAverageRating(ISBN):
     """Returns a average rating json with book given ISBN"""
@@ -470,7 +496,6 @@ def getAverageRating(ISBN):
 
     # Returns X books in the DB as json
     return jsonify({"rating": avg_rating_books[0]})
-
 
 def COMMENTED_OUT():
 # @app.route('/books', methods=['GET'])
