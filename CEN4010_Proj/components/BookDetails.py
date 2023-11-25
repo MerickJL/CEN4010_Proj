@@ -47,4 +47,4 @@ class Book(db.Model):
         self.Publisher = Pub
         self.YearPublished = Year
         self.Sold = Sold
-        self.Rating = Rating 
+        self.Rating = Rating
