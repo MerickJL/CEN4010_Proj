@@ -487,7 +487,7 @@ def updateBookRating(username, isbn):
 
     return jsonify(f"Rating updated successfully"), 200
 
-@app.route("/books/ave/<ISBN>", methods=["GET"])
+@app.route("/books/ave/<int: ISBN>", methods=["GET"])
 def getAverageRating(ISBN):
     """Returns a average rating json with book given ISBN"""
 
