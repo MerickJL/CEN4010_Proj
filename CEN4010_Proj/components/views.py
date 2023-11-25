@@ -62,17 +62,17 @@ def removeBookISBN(ISBN):
 
 @app.route("/admin/books/<int:ISBN>", methods=["PATCH"])
 def editBook(ISBN):
-    # Fetch the book by ISBN
+    # fetch the book by ISBN
     book = Book.query.filter_by(ISBN=ISBN).first()
 
-    # If the book doesn't exist, return an error
+    # if the book doesn't exist, return an error
     if not book:
         return jsonify(f"Book with ISBN {ISBN} not found"), 404
 
-    # Fetch data from request
+    # fetch data from request
     data = request.json
 
-    # Update the book details if provided in the request
+    # update the book details if provided in the request
     book.Name = data.get('Name', book.Name)
     book.Description = data.get('Description', book.Description)
     book.Price = data.get('Price', book.Price)
@@ -83,10 +83,10 @@ def editBook(ISBN):
     book.Sold = data.get('Sold', book.Sold)
     book.Rating = data.get('Rating', book.Rating)
 
-    # Commit the changes to the database
+    # commit the changes to the database
     db.session.commit()
 
-    # Return the updated book as JSON
+    # return the updated book as JSON
     return book.product_schema.jsonify(book), 200
 
 @app.route("/admin/books", methods=["GET"])
