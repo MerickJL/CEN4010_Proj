@@ -110,17 +110,6 @@ def addUser():
     # Return new_user as json
     return new_user.product_schema.jsonify(new_user)
 
-@app.route("/profile/getUsers", methods=["GET"])
-def getUsers():
-    """Returns a json with all the profile in the database"""
-    # Query
-    all_profile = Profile.query.all()
-
-    result = Profile.products_schema.dump(all_profile)
-
-    # Returns all the DB items as json
-    return jsonify(result)
-
 @app.route("/profile/<userName>", methods=["GET"])
 def getUserByUsername(userName):
     """Returns the searched user requested using the username"""
@@ -181,21 +170,6 @@ def addCards(userName):
     db.session.commit()
 
     return newCard.product_schema.jsonify(newCard)
-
-@app.route("/profile/creditcards/<userName>", methods=["GET"])
-def viewCards(userName):
-    someOwner = Profile.query.filter_by(UserName = userName).first()
-    
-    # check if user exists
-    if someOwner is None:
-        return jsonify("user does not exist")
-
-    all_cards = CreditCards.query.filter_by(ownerId = someOwner.id)
-
-    result = CreditCards.products_schema.dump(all_cards)
-
-    # Returns all the DB items as json
-    return jsonify(result)
 
 # ******************** [2] Profile Management ********************
 
