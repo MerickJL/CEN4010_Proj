@@ -81,10 +81,8 @@ def displaybooks():
 def addUser():
     """Handles creating a user profile in the databse"""
 
-    # pattern used from username(email) input
     regex = "^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$"
 
-    # Fetch the POST request's fields
     UserName = request.json["UserName"]
     Password = request.json["Password"]
     Name = request.json["Name"]
@@ -144,7 +142,7 @@ def updateUser(userName):
     return user.product_schema.jsonify(user)
 
 @app.route("/profile/<userName>/creditcards", methods=["POST"])
-def addCards(userName):
+def createCards(userName):
     someOwner = Profile.query.filter_by(UserName=userName).first()
 
     # check if user exists
