@@ -521,20 +521,29 @@ def createBookRating():
 
     return new_rating.product_schema.jsonify(new_rating)
 
-@app.route("/books/comments/<int:ISBN>", methods=["GET"])
-def getBookComments(ISBN):
+@app.route("/books/comments/<isbn>", methods=["GET"])
+def getBookCommonts(isbn):
     """Returns a json with all books ordered by rating"""
 
-    comments = Rate.query.filter_by(ISBN=ISBN).all()
+    comments = Rate.query.filter_by(isbn=isbn).all()
     
-
     result = Rate.products_schema.dump(comments)
 
     # Returns X books in the DB as json
     return jsonify(result)
 
-@app.route("/books/rate/<username>/<int:ISBN>", methods=["PUT"])
-def updateBookRating(username, ISBN):
+@app.route("/books/ave/<ISBN>", methods=["GET"])
+def getAverageRating(ISBN):
+    """Returns a average rating json with book given ISBN"""
+
+    # Query
+    avg_rating_books = (db.session.query(func.avg(Rate.rating)).filter_by(isbn=ISBN).first())
+
+    # Returns X books in the DB as json
+    return jsonify({"rating": avg_rating_books[0]})
+
+@app.route("/books/rate/<username>/<isbn>", methods=["PUT"])
+def updateBookRating(username, isbn):
     """Update a user's rating and comment on a book"""
 
     # Fetch the new rating and comment from the request
@@ -542,11 +551,11 @@ def updateBookRating(username, ISBN):
     new_comment = request.json.get("comment")
 
     # Find the existing rating
-    existing_rating = Rate.query.filter_by(username=username, ISBN=ISBN).first()
+    existing_rating = Rate.query.filter_by(username=username, isbn=isbn).first()
 
     # Check if the rating exists
     if not existing_rating:
-        return jsonify(f"Rating by '{username}' for ISBN {ISBN} not found"), 404
+        return jsonify(f"Rating by '{username}' for ISBN {isbn} not found"), 404
 
     # Update the rating and comment
     if new_rating is not None:
@@ -558,84 +567,5 @@ def updateBookRating(username, ISBN):
     db.session.commit()
 
     return jsonify(f"Rating updated successfully"), 200
-
-@app.route("/books/ave/<int:ISBN>", methods=["GET"])
-def getAverageRating(ISBN):
-    """Returns a average rating json with book given ISBN"""
-
-    # Query
-    avg_rating_books = (db.session.query(func.avg(Rate.rating)).filter_by(isbn=ISBN).first())
-
-    # Returns X books in the DB as json
-    return jsonify({"rating": avg_rating_books[0]})
-
-# @app.route('/books', methods=['GET'])
-# def get_all_books():
-#     books = Book.query.all()
-#     book_data = [{'id': book.id, 'title': book.title, 'author': book.author} for book in books]
-#     return jsonify(book_data)
-
-# @app.route('/book/<int:book_id>', methods=['GET'])
-# def get_book(book_id):
-#     book = Book.query.get_or_404(book_id)
-#     book_data = {'id': book.id, 'title': book.title, 'author': book.author}
-#     return jsonify(book_data)
-
-# @app.route('/book/<int:book_id>/ratings', methods=['GET'])
-# def get_book_ratings(book_id):
-#     ratings = Rating.query.filter_by(book_id=book_id).all()
-#     rating_data = [{'id': rating.id, 'value': rating.value, 'user_id': rating.user_id, 'timestamp': rating.timestamp} for rating in ratings]
-#     return jsonify(rating_data)
-
-# @app.route('/book/<int:book_id>/comments', methods=['GET'])
-# def get_book_comments(book_id):
-#     comments = Comment.query.filter_by(book_id=book_id).all()
-#     comment_data = [{'id': comment.id, 'text': comment.text, 'user_id': comment.user_id, 'timestamp': comment.timestamp} for comment in comments]
-#     return jsonify(comment_data)
-
-# @app.route('/book/<int:book_id>/average_rating', methods=['GET'])
-# def get_average_rating(book_id):
-#     average_rating = Rating.query.filter_by(book_id=book_id).with_entities(func.avg(Rating.value)).scalar()
-#     return jsonify({'average_rating': average_rating})
-
-# @app.route('/book/<int:book_id>/rate', methods=['POST'])
-# def rate_book(book_id):
-#     book = Book.query.get_or_404(book_id)
-#     data = request.get_json()
-
-#     if 'value' not in data or 'user_id' not in data:
-#         return jsonify({'error': 'Invalid request. Please provide value and user_id.'}), 400
-
-#     rating_value = int(data['value'])
-#     user_id = int(data['user_id'])
-
-#     if 1 <= rating_value <= 5:
-#         rating = Rating(value=rating_value, book=book, user_id=user_id)
-#         db.session.add(rating)
-#         db.session.commit()
-#         return jsonify({'message': 'Rating submitted successfully!'}), 201
-    
-#     else:
-#         return jsonify({'error': 'Invalid rating value. Please choose a rating between 1 and 5.'}), 400
-
-# @app.route('/book/<int:book_id>/comment', methods=['POST'])
-# def comment_book(book_id):
-    book = Book.query.get_or_404(book_id)
-    data = request.get_json()
-
-    if 'text' not in data or 'user_id' not in data:
-        return jsonify({'error': 'Invalid request. Please provide text and user_id.'}), 400
-
-    comment_text = data['text']
-    user_id = int(data['user_id'])
-
-    if comment_text:
-        comment = Comment(text=comment_text, book=book, user_id=user_id)
-        db.session.add(comment)
-        db.session.commit()
-        return jsonify({'message': 'Comment submitted successfully!'}), 201
-    
-    else:
-        return jsonify({'error': 'Please enter a comment.'}), 400
 
 # *********************[6] Rating and comments *******************
