@@ -59,7 +59,6 @@ class Author(db.Model):
     biography = db.Column(db.Text)
     publisher = db.Column(db.String(100))
 
-    books = db.relationship('Book', backref='author', lazy=True)
 
     def __init__(self, first_name, last_name, biography, publisher):
         self.first_name = first_name
@@ -70,7 +69,7 @@ class Author(db.Model):
     class AuthorSchema(ma.Schema):
         
         class Meta:
-            fields = ("id", "first_name", "last_name", "biography", "publisher", "books")
+            fields = ("id", "first_name", "last_name", "biography", "publisher")
 
         books = ma.Nested(Book.ProductSchema, many=True)
 
