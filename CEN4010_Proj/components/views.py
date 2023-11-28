@@ -48,7 +48,7 @@ def addBook():
     return new_book.product_schema.jsonify(new_book)
 
 @app.route("/admin/books/<int:ISBN>", methods=["GET"])
-def getBookByISBN(ISBN):
+def getBookISBN(ISBN):
     book = Book.query.filter_by(ISBN=ISBN).first()
 
     if not book:
@@ -499,8 +499,8 @@ def createBookRating():
 
     return new_rating.product_schema.jsonify(new_rating)
 
-@app.route("/books/comments/<int: isbn>", methods=["GET"])
-def getBookComments(isbn):
+@app.route("/books/comments/<int:ISBN>", methods=["GET"])
+def getBookComments(ISBN):
     """Returns a json with all books ordered by rating"""
 
     comments = Rate.query.filter_by(ISBN=ISBN).all()
@@ -511,8 +511,8 @@ def getBookComments(isbn):
     # Returns X books in the DB as json
     return jsonify(result)
 
-@app.route("/books/rate/<username>/<int:isbn>", methods=["PUT"])
-def updateBookRating(username, isbn):
+@app.route("/books/rate/<username>/<int:ISBN>", methods=["PUT"])
+def updateBookRating(username, ISBN):
     """Update a user's rating and comment on a book"""
 
     # Fetch the new rating and comment from the request
@@ -520,11 +520,11 @@ def updateBookRating(username, isbn):
     new_comment = request.json.get("comment")
 
     # Find the existing rating
-    existing_rating = Rate.query.filter_by(username=username, isbn=isbn).first()
+    existing_rating = Rate.query.filter_by(username=username, ISBN=ISBN).first()
 
     # Check if the rating exists
     if not existing_rating:
-        return jsonify(f"Rating by '{username}' for ISBN {isbn} not found"), 404
+        return jsonify(f"Rating by '{username}' for ISBN {ISBN} not found"), 404
 
     # Update the rating and comment
     if new_rating is not None:
@@ -537,7 +537,7 @@ def updateBookRating(username, isbn):
 
     return jsonify(f"Rating updated successfully"), 200
 
-@app.route("/books/ave/<int: ISBN>", methods=["GET"])
+@app.route("/books/ave/<int:ISBN>", methods=["GET"])
 def getAverageRating(ISBN):
     """Returns a average rating json with book given ISBN"""
 
