@@ -96,16 +96,38 @@ def editBook(ISBN):
 def createAuthor():
     data = request.json
     new_author = Author(
-        FirstName=data['FirstName'],
-        LastName=data['LastName'],
-        Biography=data['Biography'],
-        Publisher=data['Publisher'],
+        first_name=data['FirstName'],
+        last_name=data['LastName'],
+        biography=data['Biography'],
+        publisher=data['Publisher'],
     )
 
     db.session.add(new_author)
     db.session.commit()
 
-    return jsonify(new_author), 201
+    author_data = {
+        "id": new_author.id,
+        "first_name": new_author.first_name,
+        "last_name": new_author.last_name,
+        "biography": new_author.biography,
+        "publisher": new_author.publisher
+    }
+
+    return jsonify(author_data), 201
+
+@app.route("/admin/authors/<int:id>", methods=["DELETE"])
+def removeAuthor(id):
+    # Try to find the author by ID
+    author = Author.query.get(id)
+
+    if author:
+        # Author found, delete them from the database
+        db.session.delete(author)
+        db.session.commit()
+        return jsonify(f"Author with ID {id} has been removed"), 200
+    else:
+        # Author not found
+        return jsonify(f"Author with ID {id} not found"), 404
 
 @app.route("/admin/books/author", methods=["GET"]) # 4
 def getBooksByAuthor():
