@@ -54,22 +54,27 @@ class Book(db.Model):
 class Author(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
-    first_name = db.Column(db.String(100))
-    last_name = db.Column(db.String(100))
-    biography = db.Column(db.Text)
-    publisher = db.Column(db.String(100))
+    FirstName = db.Column(db.String(100))
+    LastName = db.Column(db.String(100))
+    Biography = db.Column(db.Text)
+    Publisher = db.Column(db.String(100))
 
 
-    def __init__(self, first_name, last_name, biography, publisher):
-        self.first_name = first_name
-        self.last_name = last_name
-        self.biography = biography
-        self.publisher = publisher
+    def __init__(self, FirstName, LastName, Biography, Publisher):
+        self.FirstName = FirstName
+        self.LastName = LastName
+        self.Biography = Biography
+        self.Publisher = Publisher
 
     class AuthorSchema(ma.Schema):
         
         class Meta:
-            fields = ("id", "first_name", "last_name", "biography", "publisher")
+            fields = (
+                "id",
+                "FirstName",
+                "LastName",
+                "Biography",
+                "Publisher")
 
         books = ma.Nested(Book.ProductSchema, many=True)
 

@@ -19,7 +19,7 @@ single file, make sure you are naming each function uniquely.
 
 # ******************** [1] Book Details ********************
 # Book Management
-@app.route("/admin/books", methods=["POST"])
+@app.route("/admin/books", methods=["POST"]) # 1
 def addBook():
     """Handles adding a book to the database"""
     # Fetch the POST request's fields
@@ -47,7 +47,7 @@ def addBook():
     # Return new_book as json
     return new_book.product_schema.jsonify(new_book)
 
-@app.route("/admin/books/<int:ISBN>", methods=["GET"])
+@app.route("/admin/books/<int:ISBN>", methods=["GET"]) # 2
 def getBookISBN(ISBN):
     book = Book.query.filter_by(ISBN=ISBN).first()
 
@@ -92,14 +92,14 @@ def editBook(ISBN):
     return book.product_schema.jsonify(book), 200
 
 # Author Management
-@app.route("/admin/authors", methods=["POST"])
+@app.route("/admin/authors", methods=["POST"]) # 3
 def createAuthor():
     data = request.json
     new_author = Author(
-        first_name=data['first_name'],
-        last_name=data['last_name'],
-        biography=data['biography'],
-        publisher=data['publisher'],
+        FirstName=data['FirstName'],
+        LastName=data['LastName'],
+        Biography=data['Biography'],
+        Publisher=data['Publisher'],
     )
 
     db.session.add(new_author)
@@ -107,7 +107,7 @@ def createAuthor():
 
     return jsonify(new_author), 201
 
-@app.route("/admin/books/author", methods=["GET"])
+@app.route("/admin/books/author", methods=["GET"]) # 4
 def getBooksByAuthor():
     first_name = request.args.get('first_name', '')
     last_name = request.args.get('last_name', '')
