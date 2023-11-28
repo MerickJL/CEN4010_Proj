@@ -2,7 +2,7 @@ import datetime
 import re
 from flask import Flask, request, jsonify, make_response
 from sqlalchemy import exists, func
-from components.BookDetails import Book
+from components.BookDetails import Book, Author
 from components.model_browsing_and_sorting_sachin import Book2
 from components.Wishlist import Wishlist
 from components.Profile import Profile, CreditCards
@@ -18,6 +18,7 @@ single file, make sure you are naming each function uniquely.
 """
 
 # ******************** [1] Book Details ********************
+# Book Management
 @app.route("/admin/books", methods=["POST"])
 def addBook():
     """Handles adding a book to the database"""
@@ -33,20 +34,26 @@ def addBook():
     Sold = request.json["Sold"]
     Rating = request.json["Rating"]
 
-    # Book DB check
     duplicate = db.session.query(exists().where(Book.Name == Name)).scalar()
 
     if duplicate:
         return jsonify("Book name is already in the database"), 400
 
-    # Create new book with fetched fields
     new_book = Book(ISBN, Name, Description, Price, Author, Genre, Publisher, YearPublished, Sold, Rating)  
 
-    # Only add book if it's unique
     db.session.add(new_book)
     db.session.commit()
 
     return new_book.product_schema.jsonify(new_book)
+
+@app.route("/admin/books/<int:ISBN>", methods=["GET"])
+def getBookByISBN(ISBN):
+    book = Book.query.filter_by(ISBN=ISBN).first()
+
+    if not book:
+        return jsonify(f"Book with ISBN {ISBN} not found"), 404
+
+    return book.product_schema.jsonify(book), 200
 
 @app.route("/admin/books/<int:ISBN>", methods=["DELETE"])
 def removeBookISBN(ISBN):
@@ -62,17 +69,13 @@ def removeBookISBN(ISBN):
 
 @app.route("/admin/books/<int:ISBN>", methods=["PATCH"])
 def editBook(ISBN):
-    # fetch the book by ISBN
     book = Book.query.filter_by(ISBN=ISBN).first()
 
-    # if the book doesn't exist, return an error
     if not book:
         return jsonify(f"Book with ISBN {ISBN} not found"), 404
 
-    # fetch data from request
     data = request.json
 
-    # update the book details if provided in the request
     book.Name = data.get('Name', book.Name)
     book.Description = data.get('Description', book.Description)
     book.Price = data.get('Price', book.Price)
@@ -83,14 +86,44 @@ def editBook(ISBN):
     book.Sold = data.get('Sold', book.Sold)
     book.Rating = data.get('Rating', book.Rating)
 
-    # commit the changes to the database
     db.session.commit()
 
-    # return the updated book as JSON
     return book.product_schema.jsonify(book), 200
 
+# Author Management
+@app.route("/admin/authors", methods=["POST"])
+def createAuthor():
+    data = request.json
+    new_author = Author(
+        first_name=data['first_name'],
+        last_name=data['last_name'],
+        biography=data['biography'],
+        publisher=data['publisher'],
+    )
+
+    db.session.add(new_author)
+    db.session.commit()
+
+    return jsonify(new_author), 201
+
+@app.route("/admin/books/author", methods=["GET"])
+def getBooksByAuthor():
+    first_name = request.args.get('first_name', '')
+    last_name = request.args.get('last_name', '')
+
+    author_full_name = f"{first_name} {last_name}".strip()
+
+    books = Book.query.filter(Book.Author.contains(author_full_name)).all()
+
+    if not books:
+        return jsonify(f"No books found for author '{author_full_name}'"), 404
+
+    result = Book.products_schema.dump(books)
+    return jsonify(result), 200
+
+# General Display 
 @app.route("/admin/books", methods=["GET"])
-def displaybooks():
+def displayAllbooks():
    
     all_books = Book.query.all()
 
@@ -282,9 +315,10 @@ def get_all_wishlists():
 def create_wishlist():
     # Fetch the POST request's fields
     title = request.json["title"]
-    
+    username = request.json["username"]
+
     # Check if the wishlist title already exists
-    existing_wishlist = Wishlist.query.filter_by(title=title).first()
+    existing_wishlist = Wishlist.query.filter_by(title=title, username=username).first()
     if existing_wishlist:
         return jsonify(f"Wishlist title '{title}' already in use."), 400
 
@@ -309,7 +343,7 @@ def remove_wishlist():
 
     return jsonify(f"Wishlist '{title}' has been successfully deleted."), 200
 
-@app.route("/wishList/<title>/books/<int:ISBN>", methods=["PUT"])
+@app.route("/wishList/<title>/books/<username>/<int:ISBN>", methods=["PUT"])
 def add_book_to_wishlist(title, ISBN):
     wishlist = Wishlist.query.filter_by(title=title).first()
     if not wishlist:
@@ -328,7 +362,7 @@ def get_books_in_wishlist(title):
 
     return Wishlist.product_schema.jsonify(wishlist)
 
-@app.route("/wishList/<title>/books/<int:ISBN>", methods=["DELETE"])
+@app.route("/wishList/<title>/books/<username>/<int:ISBN>", methods=["DELETE"])
 def remove_book_from_wishlist(title, ISBN):
     wishlist = Wishlist.query.filter_by(title=title).first()
     if not wishlist:
@@ -449,11 +483,11 @@ def createBookRating():
 
     return new_rating.product_schema.jsonify(new_rating)
 
-@app.route("/books/comments/<int: isbn>", methods=["GET"])
-def getBookComments(isbn):
+@app.route("/books/comments/<int:ISBN>", methods=["GET"])
+def getBookComments(ISBN):
     """Returns a json with all books ordered by rating"""
 
-    comments = Rate.query.filter_by(isbn=isbn).all()
+    comments = Rate.query.filter_by(ISBN=ISBN).all()
     
 
     result = Rate.products_schema.dump(comments)
@@ -461,8 +495,8 @@ def getBookComments(isbn):
     # Returns X books in the DB as json
     return jsonify(result)
 
-@app.route("/books/rate/<username>/<int:isbn>", methods=["PUT"])
-def updateBookRating(username, isbn):
+@app.route("/books/rate/<username>/<int:ISBN>", methods=["PUT"])
+def updateBookRating(username, ISBN):
     """Update a user's rating and comment on a book"""
 
     # Fetch the new rating and comment from the request
@@ -470,11 +504,11 @@ def updateBookRating(username, isbn):
     new_comment = request.json.get("comment")
 
     # Find the existing rating
-    existing_rating = Rate.query.filter_by(username=username, isbn=isbn).first()
+    existing_rating = Rate.query.filter_by(username=username, ISBN=ISBN).first()
 
     # Check if the rating exists
     if not existing_rating:
-        return jsonify(f"Rating by '{username}' for ISBN {isbn} not found"), 404
+        return jsonify(f"Rating by '{username}' for ISBN {ISBN} not found"), 404
 
     # Update the rating and comment
     if new_rating is not None:
@@ -487,7 +521,7 @@ def updateBookRating(username, isbn):
 
     return jsonify(f"Rating updated successfully"), 200
 
-@app.route("/books/ave/<int: ISBN>", methods=["GET"])
+@app.route("/books/ave/<int:ISBN>", methods=["GET"])
 def getAverageRating(ISBN):
     """Returns a average rating json with book given ISBN"""
 
