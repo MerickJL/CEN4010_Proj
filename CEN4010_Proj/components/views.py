@@ -22,7 +22,7 @@ single file, make sure you are naming each function uniquely.
 @app.route("/admin/books", methods=["POST"])
 def addBook():
     """Handles adding a book to the database"""
-
+    # Fetch the POST request's fields
     ISBN = request.json["ISBN"]
     Name = request.json["Name"]
     Description = request.json["Description"]
@@ -44,6 +44,7 @@ def addBook():
     db.session.add(new_book)
     db.session.commit()
 
+    # Return new_book as json
     return new_book.product_schema.jsonify(new_book)
 
 @app.route("/admin/books/<int:ISBN>", methods=["GET"])
@@ -123,12 +124,13 @@ def getBooksByAuthor():
 
 # General Display 
 @app.route("/admin/books", methods=["GET"])
-def displayAllbooks():
+def displaybooks():
    
     all_books = Book.query.all()
 
     result = Book.products_schema.dump(all_books)
 
+    # Returns all the DB items as json
     return jsonify(result)
 
 # ******************** [1] Book Details ********************
@@ -137,7 +139,8 @@ def displayAllbooks():
 # ******************** [2] Profile Management ********************
 @app.route("/profile/createUser", methods=["POST"])
 def addUser():
-    # Pattern check for email
+    """Handles creating a user profile in the databse"""
+
     regex = "^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$"
 
     UserName = request.json["UserName"]
@@ -145,26 +148,32 @@ def addUser():
     Name = request.json["Name"]
     HomeAddress = request.json["HomeAddress"]
 
-    # Username Check
+    # check if username is valid
     if (re.search(regex, UserName)) == None:
         return jsonify("Invalid username")
 
-    # Username Duplicate Check
+    # Check if the username already exists in the DB
     duplicate = db.session.query(exists().where(Profile.UserName == UserName)).scalar()
+
     if duplicate:
         return jsonify("Username already in use")
 
+    # Create new user with fetched fields
     new_user = Profile(UserName, Password, Name, HomeAddress)
 
+    # Only add user if it's unique
     db.session.add(new_user)
     db.session.commit()
 
+    # Return new_user as json
     return new_user.product_schema.jsonify(new_user)
 
 @app.route("/profile/<userName>", methods=["GET"])
 def getUserByUsername(userName):
-    
+    """Returns the searched user requested using the username"""
     user = Profile.query.filter_by(UserName=userName).first()
+
+    # check if user exists
     if user is None:
         return jsonify(None)
 
@@ -172,11 +181,13 @@ def getUserByUsername(userName):
 
 @app.route("/profile/<userName>", methods=["PUT"])
 def updateUser(userName):
-    
     user = Profile.query.filter_by(UserName=userName).first()
+
+    # check if user exists
     if user is None:
         return jsonify(None)
 
+    # Fetch the PUT request's fields
     Password = request.json["Password"]
     Name = request.json["Name"]
     HomeAddress = request.json["HomeAddress"]
@@ -187,25 +198,31 @@ def updateUser(userName):
 
     db.session.commit()
 
+    # Update user fields
     return user.product_schema.jsonify(user)
 
-@app.route("/profile/creditcards/<userName>", methods=["POST"])
-def addCards(userName):
-    someUser = Profile.query.filter_by(UserName=userName).first()
+@app.route("/profile/<userName>/creditcards", methods=["POST"])
+def createCards(userName):
+    someOwner = Profile.query.filter_by(UserName=userName).first()
 
-    if someUser is None:
+    # check if user exists
+    if someOwner is None:
         return jsonify(None)
 
     cardNumber = request.json["cardNumber"]
     expirationDate = request.json["expirationDate"]
     cvs = request.json["cvs"]
 
-    duplicate = db.session.query(exists().where(CreditCards.cardNumber == cardNumber)).scalar()
+    duplicate = db.session.query(
+        exists().where(CreditCards.cardNumber == cardNumber)
+    ).scalar()
+
+    # check to see if card already in database
     if duplicate:
         return jsonify("card already in use")
 
     newCard = CreditCards(cardNumber, expirationDate, cvs)
-    newCard.ownerId = someUser.id
+    newCard.ownerId = someOwner.id
 
     db.session.add(newCard)
     db.session.commit()
@@ -302,6 +319,8 @@ def discount_books_by_publisher():
 
 # ******************** [3] Book Browsing & Sorting *******************
 
+
+
 # ******************** [4] Wishlist ************************
 @app.route("/wishList", methods=["GET"])
 def get_all_wishlists():
@@ -376,8 +395,6 @@ def remove_book_from_wishlist(title, ISBN):
 
 # ******************** [4] Wishlist ************************
 
-
-
 # *********************[5] Shopping Cart *******************
 @app.route("/admin/ShoppingCart", methods=["POST"])
 def createShoppingCart():
@@ -440,7 +457,6 @@ def deleteBookFromShoppingCart(id, ISBN):
             "id": entry_to_delete.id,
             "ownerId": entry_to_delete.ownerId,
             "bookId": entry_to_delete.bookId,
-            # Add other attributes as needed
         }
         db.session.delete(entry_to_delete)
         db.session.commit()
@@ -483,8 +499,8 @@ def createBookRating():
 
     return new_rating.product_schema.jsonify(new_rating)
 
-@app.route("/books/comments/<int:ISBN>", methods=["GET"])
-def getBookComments(ISBN):
+@app.route("/books/comments/<int: isbn>", methods=["GET"])
+def getBookComments(isbn):
     """Returns a json with all books ordered by rating"""
 
     comments = Rate.query.filter_by(ISBN=ISBN).all()
@@ -495,8 +511,8 @@ def getBookComments(ISBN):
     # Returns X books in the DB as json
     return jsonify(result)
 
-@app.route("/books/rate/<username>/<int:ISBN>", methods=["PUT"])
-def updateBookRating(username, ISBN):
+@app.route("/books/rate/<username>/<int:isbn>", methods=["PUT"])
+def updateBookRating(username, isbn):
     """Update a user's rating and comment on a book"""
 
     # Fetch the new rating and comment from the request
@@ -504,11 +520,11 @@ def updateBookRating(username, ISBN):
     new_comment = request.json.get("comment")
 
     # Find the existing rating
-    existing_rating = Rate.query.filter_by(username=username, ISBN=ISBN).first()
+    existing_rating = Rate.query.filter_by(username=username, isbn=isbn).first()
 
     # Check if the rating exists
     if not existing_rating:
-        return jsonify(f"Rating by '{username}' for ISBN {ISBN} not found"), 404
+        return jsonify(f"Rating by '{username}' for ISBN {isbn} not found"), 404
 
     # Update the rating and comment
     if new_rating is not None:
@@ -521,7 +537,7 @@ def updateBookRating(username, ISBN):
 
     return jsonify(f"Rating updated successfully"), 200
 
-@app.route("/books/ave/<int:ISBN>", methods=["GET"])
+@app.route("/books/ave/<int: ISBN>", methods=["GET"])
 def getAverageRating(ISBN):
     """Returns a average rating json with book given ISBN"""
 
@@ -531,7 +547,6 @@ def getAverageRating(ISBN):
     # Returns X books in the DB as json
     return jsonify({"rating": avg_rating_books[0]})
 
-def COMMENTED_OUT():
 # @app.route('/books', methods=['GET'])
 # def get_all_books():
 #     books = Book.query.all()
@@ -583,25 +598,22 @@ def COMMENTED_OUT():
 
 # @app.route('/book/<int:book_id>/comment', methods=['POST'])
 # def comment_book(book_id):
-#    book = Book.query.get_or_404(book_id)
-#    data = request.get_json()
+    book = Book.query.get_or_404(book_id)
+    data = request.get_json()
 
-#    if 'text' not in data or 'user_id' not in data:
-#        return jsonify({'error': 'Invalid request. Please provide text and user_id.'}), 400
+    if 'text' not in data or 'user_id' not in data:
+        return jsonify({'error': 'Invalid request. Please provide text and user_id.'}), 400
 
-#    comment_text = data['text']
-#    user_id = int(data['user_id'])
+    comment_text = data['text']
+    user_id = int(data['user_id'])
 
-#    if comment_text:
-#        comment = Comment(text=comment_text, book=book, user_id=user_id)
-#        db.session.add(comment)
-#        db.session.commit()
-#        return jsonify({'message': 'Comment submitted successfully!'}), 201
+    if comment_text:
+        comment = Comment(text=comment_text, book=book, user_id=user_id)
+        db.session.add(comment)
+        db.session.commit()
+        return jsonify({'message': 'Comment submitted successfully!'}), 201
     
-#    else:
-#        return jsonify({'error': 'Please enter a comment.'}), 400
-
-    pass # !!!! <!-- added to remove compile time errors... --> !!!! #
+    else:
+        return jsonify({'error': 'Please enter a comment.'}), 400
 
 # *********************[6] Rating and comments *******************
-    
